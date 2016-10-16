@@ -154,7 +154,7 @@ def put_into_sql(df):
     import sqlite3
     import pandas as pd
     
-    connection = sqlite3.connect("../rep_app.db")
+    connection = sqlite3.connect("../../rep_app.db")
 
     cursor = connection.cursor()
 
@@ -173,7 +173,7 @@ def put_into_sql(df):
     name varchar(255), 
     bioguide_id PRIMARY KEY,  
     state varchar(255), 
-    district varchar(255), 
+    district int, 
     party varchar(255), 
     year_elected YEAR, 
     bio_text LONGTEXT,
