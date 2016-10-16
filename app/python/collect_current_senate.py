@@ -41,7 +41,7 @@ def put_into_sql(data_set):
     import pandas as pd
     from sqlalchemy import create_engine
 
-    connection = sqlite3.connect("../rep_app.db")
+    connection = sqlite3.connect("../../rep_app.db")
     cursor = connection.cursor()
 
     ## delete 
