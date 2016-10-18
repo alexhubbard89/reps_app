@@ -154,7 +154,7 @@ def put_into_sql(df):
     import sqlite3
     import pandas as pd
     
-    connection = sqlite3.connect("../rep_app.db")
+    connection = sqlite3.connect("../../rep_app.db")
 
     cursor = connection.cursor()
 

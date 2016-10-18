@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 from sqlalchemy import create_engine
 
-connection = sqlite3.connect("../rep_app.db")
+connection = sqlite3.connect("../../rep_app.db")
 cursor = connection.cursor()
 
 
@@ -45,6 +45,24 @@ phone varchar(255),
 email Hyperlink, 
 image BOOLEAN);"""
 
+cursor.execute(sql_command)
+
+## Create vote menu table
+
+sql_command = """
+    CREATE TABLE vote_menu (
+    issue varchar(255),
+    question varchar(255),
+    questionmeasure varchar(255),
+    result varchar(255),
+    title LONGTEXT,
+    vote_date DATE, 
+    vote_number int, 
+    vote_tallynays int, 
+    vote_tallyyeas int,
+    congress int, 
+    session int,
+    vote_id PRIMARY KEY);"""
 cursor.execute(sql_command)
 
 # never forget this, if you want the changes to be saved:
