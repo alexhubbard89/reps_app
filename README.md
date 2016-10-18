@@ -1,2 +1,2 @@
-# reps_app
-Python backend for super coolio political app. Name TBD
+# This needs a name!
+Now taking recommendations
