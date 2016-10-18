@@ -15,6 +15,7 @@ def get_vote_menu(congress_num, session_num):
 	x.loc[:, 'vote_id'] = x['congress'].astype(str)+x['session'].astype(str)+x['vote_number'].astype(str)
 
 	return x
+	hi
 
 
 def put_into_sql(df):
