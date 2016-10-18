@@ -108,13 +108,16 @@ def show_entries():
             from current_congress_bio
             where state = '{}'
             and ({});""".format(state_long, district)))]
+    vote_menu_data = [r for r in dict_gen(db.execute("""select * from vote_menu
+        where congress = 114
+        and session = 2;"""))]
         ## make sql query, make as diction, and then return as json
     if ((len(data) > 0) & (len(data2) > 0)):
-        return jsonify(results=(data, data2))
+        return jsonify(results=(data, data2, vote_menu_data))
     elif (len(data) > 0):
-        return jsonify(results=(data))
+        return jsonify(results=(data, vote_menu_data))
     elif (len(data2) > 0):
-        return jsonify(results=(data2))
+        return jsonify(results=(data2, vote_menu_data))
     else:
         return "We can not find your zip code. Please try again."
 
