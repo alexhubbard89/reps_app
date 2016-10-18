@@ -43,6 +43,7 @@ def put_into_sql(data_set):
 
     connection = sqlite3.connect("../../rep_app.db")
     cursor = connection.cursor()
+    
 
     ## delete 
     # I'm deleting to make sure we have the most
