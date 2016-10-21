@@ -1,1 +1,2 @@
-console.log('main.js linked!');
+console.log('main js linked');
+

@@ -93,9 +93,9 @@ def get_district_num(zip_code,state_short):
     return total_query
 
 
-@app.route('/api')
+@app.route('/api', methods=['GET', 'POST'])
 def show_entries():
-    zip_code = 92111
+    zip_code = zip
     state_short =  get_state_by_zip(zip_code)
     state_long = str(us.states.lookup(state_short))
     district = get_district_num(zip_code,state_short)
