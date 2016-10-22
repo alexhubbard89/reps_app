@@ -89,11 +89,36 @@ def put_into_sql(df):
 
 ## Collect data
 import pandas as pd
-df = pd.DataFrame()
+import datetime
 
-for i in range(101, 115):
-	for j in range(1,3):
-		print 'get data {}, {}'.format(i, j)
-		df = get_vote_menu(i, j)
-		print 'put into sql'
-		put_into_sql(df)
+## Collect congress data
+"""
+The congress number changes
+every other year, the session 
+changes every year. I need to
+know the year of the congress
+in order to have an accurate 
+date column."""
+
+congress = 101
+session = 1
+for i in range(1989, 2017):
+    df = get_vote_menu(congress, session)
+    print 'get data {}, {}'.format(congress, session)
+    ## After data has been collected and cleaned
+    ## add the date. This is done outside of the
+    ## fucntion because there are no indicators
+    ## to the date inside the funciton. Adding a 
+    ## date input will be a complication for future
+    ## vote menu collection, as I will just use
+    ## the datetime.now year.
+    df['vote_date'] = df['vote_date'].apply(lambda x: 
+                                            str(datetime.datetime.strptime(
+                '{}-{}-{}'.format(x.split('-')[0],
+                                  x.split('-')[1],i), '%d-%b-%Y')))
+    session +=1
+    if session > 2:
+        session = 1
+        congress +=1
+    print 'put into sql'
+    put_into_sql(df)
