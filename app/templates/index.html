@@ -11,16 +11,26 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/css/style.css') }}"> 
     </head>
     <body>
-        <h1>Hello Alex!!!!</h1>
-        <section class="senators" ng-controller="SenatorsController">
-          <form role="form" ng-submit="getResults()">
-          <input type="text" ng-model="zipcode" name="zipcode" class="form-control" id="zip-box" placeholder="Enter ZIP Code">
-          </div>
-        </section>
-        <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
-        <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+      <header>
+        <h1>Who the f***<br>are my senators?!</h1>
+      </header>
+      <div class="senators" ng-controller="SenatorsController">
+        <h3>Enter your ZIP code to find out:</h3>
+        <form name="zipForm" role="form" ng-submit="getResults()">
+          <input type="tel" ng-model="zipcode" name="zipcode" placeholder="ZIP Code">
+        </form>
+        <div class="list-senators">
+          {% raw %}
+          <ul class="senator-list">
+            <li ng-cloak ng-repeat="senator in senators track by $index">{{ senator.first_name }} {{ senator.last_name }}</li>
+          </ul>
+          {% endraw %}
+        </div>
+      </div>
+      <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+      <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
+      <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     </body>
 </html>
