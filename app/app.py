@@ -135,6 +135,8 @@ def get_vote_menu(db):
     df = pd.read_sql_query(sql_command, db)
     df = df.groupby(['congress', 'session']).count()['vote_id'].reset_index(drop=False)
     df.columns = ['congress', 'session', 'num_votes']
+    df['num_votes_compared_to_avg'] = df['num_votes'].apply(
+        lambda x: x - df['num_votes'].mean())
     df = df.transpose().to_dict()
     return df
 
@@ -171,7 +173,7 @@ def show_entries():
         return jsonify(results=(senator_result,
             congress_result,vote_menu_data))
     except:
-        return 'Please enter a valid ZIP code.'
+        return jsonify(results = None)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
