@@ -171,7 +171,7 @@ def show_entries():
         return jsonify(results=(senator_result,
             congress_result,vote_menu_data))
     except:
-        return 'Please enter a valid ZIP code.'
+        return jsonify(results = None)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
