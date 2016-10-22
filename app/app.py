@@ -133,10 +133,19 @@ def get_vote_menu(db):
     select * from vote_menu
     where ({})""".format(get_vote_menu_query())
     df = pd.read_sql_query(sql_command, db)
-    df = df.groupby(['congress', 'session']).count()['vote_id'].reset_index(drop=False)
-    df.columns = ['congress', 'session', 'num_votes']
-    df['num_votes_compared_to_avg'] = df['num_votes'].apply(
-        lambda x: x - df['num_votes'].mean())
+    df = df.groupby(['congress', 'session', 'department']).count()['vote_id'].reset_index(drop=False)
+    df.columns = ['congress', 'session', 'department', 'num_votes']
+    df = df.loc[((df['department'] == 'house') |
+        (df['department'] == 'senate'))].reset_index(drop=True)
+    ## Get avearge for each department
+    house_avg = df.loc[df['department'] == 'house', 'num_votes'].mean()
+    senate_avg = df.loc[df['department'] == 'senate', 'num_votes'].mean()
+    ## Get comparision for each department
+    df.loc[df['department'] == 'house','num_votes_compared_to_avg'] = df.loc[
+        df['department'] == 'house', 'num_votes'].apply(lambda x: x - house_avg)
+    df.loc[df['department'] == 'senate','num_votes_compared_to_avg'] = df.loc[
+        df['department'] == 'senate', 'num_votes'].apply(lambda x: x - senate_avg)
+
     df = df.transpose().to_dict()
     return df
 
