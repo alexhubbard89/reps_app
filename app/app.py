@@ -153,27 +153,27 @@ def get_congress_leader(state_long, district):
     return congress_result
 
 
-@app.route('/api', methods=['GET', 'POST'])
+@app.route('/api', methods=['POST'])
 def show_entries():
-    zipcode == None
-    if zipcode != None:
-        zip_code = zipcode
+    data = json.loads(request.data.decode())
+    zip_code = data["zipcode"]
+    try:
         state_short =  get_state_by_zip(zip_code)
         state_long = str(us.states.lookup(state_short))
         district = get_district_num(zip_code,state_short)
-        
+
         ## Query the data base for homepage info
         senator_result = get_senator(state_short)
         congress_result = get_congress_leader(state_long, district)
         vote_menu_data = get_vote_menu(get_db())
 
-        ## Return results
+        # Return results
         return jsonify(results=(senator_result,
             congress_result,vote_menu_data))
+    except:
+        return 'Please enter a valid ZIP code.'
 
-
-
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
 
