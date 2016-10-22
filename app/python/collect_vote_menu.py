@@ -5,6 +5,17 @@ def get_vote_menu(congress_num, session_num):
 	from xmljson import badgerfish as bf
 	from xml.etree.ElementTree import fromstring
 	from pandas.io.json import json_normalize
+
+	columns = ['issue', 'question', 'questionmeasure', 'result', 'title',
+	'vote_date', 'vote_number', 'vote_tallynays', 'vote_tallyyeas',
+	'congress', 'session', 'vote_id']
+
+	## This will be used to map the department
+	dept_map = {'H.R.': 'house', 'S.': 'senate', 'H.Amdt.': 'house', 'S.Amdt.': 'senate',
+	'H.Res.': 'house', 'S.Res.': 'senate', 'H.Con.Res.': 'house', 'S.Con.Res.': 'senate',
+	'H.J.Res.': 'house', 'S.J.Res.': 'senate'}
+
+
 	url = 'http://www.senate.gov/legislative/LIS/roll_call_lists/vote_menu_{}_{}.xml'.format(congress_num, 
                                                                                             session_num)
 	r = requests.get(url)
@@ -13,9 +24,18 @@ def get_vote_menu(congress_num, session_num):
 	x.loc[:, 'congress'] = congress_num
 	x.loc[:,'session'] = session_num
 	x.loc[:, 'vote_id'] = x['congress'].astype(str)+x['session'].astype(str)+x['vote_number'].astype(str)
+	try: 
+		x.loc[df['issue'].isnull(), 'issue'] = x.loc[df['issue'].isnull(), 'issueA']
+		x['questionmeasure'] = x['question']
+	except:
+		'no cleanining needed'
+	x = x[columns]
+	x.loc[x['issue'].notnull(), 'dpartment'] = x.loc[x['issue'].notnull(),
+	                                                 'issue'].apply(
+	                                                 	lambda xvar: xvar.split(' ')[0]).map(dept_map)
+
 
 	return x
-	hi
 
 
 def put_into_sql(df):
@@ -43,14 +63,16 @@ def put_into_sql(df):
 		    vote_tallyyeas,
 		    congress, 
 		    session,
-		    vote_id)
+		    vote_id,
+		    department)
 		    VALUES ("{issue}", "{question}", "{questionmeasure}", "{result}",
 		     "{title}", "{vote_date}", "{vote_number}", "{vote_tallynays}",
-		     "{vote_tallyyeas}", "{congress}", "{session}", "{vote_id}");"""
+		     "{vote_tallyyeas}", "{congress}", "{session}", "{vote_id}", 
+		     "{department}");"""
 
             sql_command = format_str.format(issue=p[0], question=p[1], questionmeasure=p[2],
             result=p[3], title=p[4], vote_date=p[5], vote_number=p[6], vote_tallynays=p[7], 
-            vote_tallyyeas=p[8], congress=p[9], session=p[10], vote_id=p[11])
+            vote_tallyyeas=p[8], congress=p[9], session=p[10], vote_id=p[11], department=p[12])
             try:
                 cursor.execute(sql_command)
             except:

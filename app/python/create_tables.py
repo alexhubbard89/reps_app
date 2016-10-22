@@ -61,7 +61,8 @@ sql_command = """
     vote_tallyyeas int,
     congress int, 
     session int,
-    vote_id PRIMARY KEY);"""
+    vote_id PRIMARY KEY
+    department varchar(255));"""
 cursor.execute(sql_command)
 
 # never forget this, if you want the changes to be saved:
