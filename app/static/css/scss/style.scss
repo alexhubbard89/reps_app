@@ -11,18 +11,37 @@ $muli-font: 'Muli', sans-serif;
 body {
   font: 100% $muli-font;
   color: #000;
+
+h1 {
+  text-align: center;
+  text-transform: uppercase;
+  margin: 40px auto;
 }
 
 header {
- h1 {
-  text-align: center;
-  font-size: 50px;
-  margin: 40px auto;
-  text-transform: uppercase;
+.logo {
+  margin-top: 20px;
+}
+ nav.main {
+  width: 100%;
+  margin-top: 20px;
+  ul {
+    list-style-type: none;
+    display: inline-flex;
+    justify-content: flex-end;
+    width: 100%;
+    padding: 0;
+  }
+  li {
+    padding: 10px 20px;
+  }
+  a {
+    text-decoration: none;
+  }
  }
 }
 
-.senators {
+.reps {
   h3 {
     text-align: center;
   }
@@ -46,4 +65,5 @@ header {
   }
 }
 
+}
 
