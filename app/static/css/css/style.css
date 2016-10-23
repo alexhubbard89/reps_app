@@ -3,27 +3,39 @@
 body {
   font: 100% "Muli", sans-serif;
   color: #000; }
-
-header h1 {
-  text-align: center;
-  font-size: 50px;
-  margin: 40px auto;
-  text-transform: uppercase; }
-
-.senators h3 {
-  text-align: center; }
-.senators form input {
-  margin: 0 auto;
-  display: block;
-  width: auto; }
-.senators ul {
-  list-style-type: none;
-  padding: 0;
-  margin-top: 50px; }
-  .senators ul li {
+  body h1 {
     text-align: center;
-    font-size: 40px;
-    color: #5FA5E2;
-    text-transform: uppercase; }
+    text-transform: uppercase;
+    margin: 40px auto; }
+  body header .logo {
+    margin-top: 20px; }
+  body header nav.main {
+    width: 100%;
+    margin-top: 20px; }
+    body header nav.main ul {
+      list-style-type: none;
+      display: inline-flex;
+      justify-content: flex-end;
+      width: 100%;
+      padding: 0; }
+    body header nav.main li {
+      padding: 10px 20px; }
+    body header nav.main a {
+      text-decoration: none; }
+  body .reps h3 {
+    text-align: center; }
+  body .reps form input {
+    margin: 0 auto;
+    display: block;
+    width: auto; }
+  body .reps ul {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 50px; }
+    body .reps ul li {
+      text-align: center;
+      font-size: 40px;
+      color: #5FA5E2;
+      text-transform: uppercase; }
 
 /*# sourceMappingURL=style.css.map */
