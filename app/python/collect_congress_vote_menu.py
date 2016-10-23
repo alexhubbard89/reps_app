@@ -60,9 +60,16 @@ def get_congress_vote_menu(year):
             
     df['date'] = df['date'].apply(lambda x: str(
         datetime.datetime.strptime('{}-{}-{}'.format(x.split('-')[0],
-                                                     x.split('-')[1],2016), '%d-%b-%Y')))
+                                                     x.split('-')[1],year), '%d-%b-%Y')))
     df.loc[:, 'congress'] = congress
     df.loc[:, 'session'] = session
+    df.loc[:, 'roll_id'] = df['congress'].astype(str)+df['session'].astype(str)+df['roll'].astype(str)
+    ## These two columns are adding a weird
+    ## unicode object that sql doesnt recognize.
+    ## All of the instances are really just blank
+    ## so I'm making the values null.
+    df.loc[df['title_description'] == u'\xa0', 'title_description'] = None
+    df.loc[df['question'] == u'\xa0', 'question'] = None
     df = df.reset_index(drop=True)
     return df
 
@@ -90,28 +97,18 @@ def put_into_sql(df):
             result, 
             title_description,
             congress,
-            session)
+            session,
+            roll_id)
             VALUES ("{roll}", "{roll_link}", "{date}", "{issue}",
              "{issue_link}", "{question}", "{result}", "{title_description}",
-             "{congress}", "{session}");"""
+             "{congress}", "{session}", "{roll_id}");"""
 
 
-            sql_command = format_str.format(roll=p[0].encode('utf-8'), 
-                roll_link=p[1].encode('utf-8'), date=p[2].encode('utf-8'),
-                issue=p[3].encode('utf-8'), issue_link=p[4].encode('utf-8'),
-                question=p[5].encode('utf-8'), result=p[6].encode('utf-8'),
-                title_description=p[7].encode('utf-8'), congress=p[8].encode('utf-8'),
-                session=p[9].encode('utf-8'))
-            try:
-                cursor.execute(sql_command)
-            except:
-                try:
-                    cursor.execute(sql_command.replace('"', "'"))
-                except:
-                    try:
-                        cursor.execute(sql_command.replace('"', ""))
-                    except:
-                        'one of those should put into sql'
+            sql_command = format_str.format(roll=p[0], roll_link=p[1], date=p[2],
+                issue=p[3], issue_link=p[4], question=p[5], result=p[6],
+                title_description=p[7], congress=p[8], session=p[9], roll_id=p[10])
+            
+            cursor.execute(sql_command)
     # never forget this, if you want the changes to be saved:
     connection.commit()
     connection.close()

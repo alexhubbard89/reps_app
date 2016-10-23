@@ -80,7 +80,7 @@ def get_bio_image(df):
         r.content
         try:
             image_save = Image.open(StringIO(r.content))
-            image_save.save('../public/img/bio_images/{}.png'.format(df['bioguide_id'][i]))
+            image_save.save('../static/img/bio_images/{}.png'.format(df['bioguide_id'][i]))
             df.loc[i, 'image'] = True
         except:
             df.loc[i, 'image'] = False
