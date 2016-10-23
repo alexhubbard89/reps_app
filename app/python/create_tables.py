@@ -61,8 +61,24 @@ sql_command = """
     vote_tallyyeas int,
     congress int, 
     session int,
-    vote_id PRIMARY KEY
+    vote_id PRIMARY KEY,
     department varchar(255));"""
+cursor.execute(sql_command)
+
+## Create congress vote menu table
+sql_command = """
+    CREATE TABLE congress_vote_menu (
+    roll int,
+    roll_link Hyperlink,
+    date DATE,
+    issue varchar(255),
+    issue_link DATE,
+    question varchar(255), 
+    result varchar(255), 
+    title_description LONGTEXT,
+    congress int,
+    session int,
+    roll_id PRIMARY KEY);"""
 cursor.execute(sql_command)
 
 # never forget this, if you want the changes to be saved:
