@@ -4,40 +4,58 @@
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <title>Reps App</title>
-        <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='lib/tether/tether.min.css') }}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/css/style.css') }}"> 
     </head>
     <body>
-      <header>
-        <nav>
-          <div class="logo">
-            <h1>REPS!</h1>
-          </div>
-        </nav>
+      <header class="container">
+        <div class="col-md-2 logo">
+          <h3>REPS</h3>
+        </div>
+        <div class="col-md-10">
+          <nav class="main" ng-controller="NavCtrl">
+            <ul class="nav navbar-nav">
+              <li ng-class="{active: isActive('/')}">
+                <a href="/"></i>Dashboard</a>
+              </li>
+              <li ng-class="{active: isActive('/profile')}">
+                <a href="#">Profile</a>
+              </li>
+              <li ng-class="{active: isActive('/about')}">
+                <a href="#">About</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </header>
-      <div class="senators" ng-controller="SenatorsController">
-        <h3>Enter your ZIP code to find out:</h3>
+      <div class="reps" ng-controller="RepsCtrl">
+        <h1>Who the f*** are my reps?!</h1>
         <form name="zipForm" role="form" ng-submit="getReps()">
           <input type="tel" ng-model="zipcode" name="zipcode" placeholder="ZIP Code">
         </form>
-        <div class="list-senators">
+        <div>
           {% raw %}
           <ul class="senator-list">
-            <li ng-cloak ng-repeat="senator in senators track by $index">{{ senator.first_name }} {{ senator.last_name }}<img ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png"></li>
+            <li ng-cloak ng-repeat="senator in senators track by $index">{{ senator.first_name }} {{ senator.last_name }}<img ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
           </ul>
            <ul class="congress-list">
-            <li ng-cloak ng-repeat="congress in congress track by $index">{{ congress.name }}<img ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png"></li>
+            <li ng-cloak ng-repeat="congress in congress track by $index">{{ congress.name }}<img ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
           </ul>
           {% endraw %}
         </div>
       </div>
-      <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
-      <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
-      <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-      <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+      <div class="scripts">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+        <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+        <script src="{{ url_for('static', filename='lib/tether/tether.min.js') }}"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
+        <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+      </div>
     </body>
 </html>
