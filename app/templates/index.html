@@ -10,41 +10,55 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/css/style.css') }}"> 
     </head>
-    <body>
+    <body ng-cloak class="ng-cloak">
       <header class="container">
-        <div class="col-md-2 logo">
-          <h3>REPS</h3>
-        </div>
-        <div class="col-md-10">
-          <nav class="main" ng-controller="NavCtrl">
-            <ul class="nav navbar-nav">
-              <li ng-class="{active: isActive('/')}">
-                <a href="/"></i>Dashboard</a>
-              </li>
-              <li ng-class="{active: isActive('/profile')}">
-                <a href="#">Profile</a>
-              </li>
-              <li ng-class="{active: isActive('/about')}">
-                <a href="#">About</a>
-              </li>
-            </ul>
-          </nav>
+        <div class="row">
+          <div class="col-md-2 logo">
+            <h3>REPS!</h3>
+          </div>
+          <div class="col-md-10">
+            <nav class="main" ng-controller="NavCtrl">
+              <ul class="nav navbar-nav">
+                <li ng-class="{active: isActive('/')}"><a href="/"></i>Dashboard</a></li>
+                <li ng-class="{active: isActive('/profile')}"><a href="#">Profile</a></li>
+                <li ng-class="{active: isActive('/about')}"><a href="#">About</a></li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </header>
-      <div class="reps" ng-controller="RepsCtrl">
-        <h1>Who the f*** are my reps?!</h1>
-        <form name="zipForm" role="form" ng-submit="getReps()">
-          <input type="tel" ng-model="zipcode" name="zipcode" placeholder="ZIP Code">
-        </form>
-        <div>
-          {% raw %}
-          <ul class="senator-list">
-            <li ng-cloak ng-repeat="senator in senators track by $index">{{ senator.first_name }} {{ senator.last_name }}<img ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
-          </ul>
-           <ul class="congress-list">
-            <li ng-cloak ng-repeat="congress in congress track by $index">{{ congress.name }}<img ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
-          </ul>
-          {% endraw %}
+      <div class="reps container" ng-controller="RepsCtrl">
+        <div class="row">
+          <div class="col-md-12">
+            <label>Enter your ZIP code:</label>
+            <form name="zipForm" role="form" ng-submit="getReps()">
+              <input type="tel" ng-model="zipcode" name="zipcode">
+              <input class="get-reps-btn" type="submit" ng-submit="getReps()" value="Go">
+            </form>
+          </div>
+        </div>
+        <div class="row main-dash">
+          <div class="col-md-6 rep-photos">
+            {% raw %}
+            <div class="row group-container">
+              <p class="group-label">Senate</p>
+              <ul class="senator-list">
+                <li ng-repeat="senator in senators track by $index"><!-- {{ senator.first_name }} {{ senator.last_name }} --><img class="photo-id" ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
+              </ul>
+            </div>
+            <div class="row group-container">
+              <p class="group-label">Congress</p>
+              <ul class="congress-list">
+                <li ng-repeat="congress in congress track by $index"><!-- {{ congress.name }} --><img class="photo-id" ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
+              </ul>
+            </div>
+            {% endraw %}
+          </div>
+          <div class="col-md-6">
+            <div class="graph-container">
+              <p>This is a placeholder for D3!</p>
+            </div>
+          </div>
         </div>
       </div>
       <div class="scripts">
