@@ -1,41 +1,86 @@
 @import url("https://fonts.googleapis.com/css?family=Raleway");
 @import url("https://fonts.googleapis.com/css?family=Muli");
+@import url("https://fonts.googleapis.com/css?family=Roboto");
 body {
-  font: 100% "Muli", sans-serif;
-  color: #000; }
+  font: 100% "Roboto", sans-serif;
+  color: #3A3A3A; }
+  body [ng\:cloak], body [ng-cloak], body [data-ng-cloak], body [x-ng-cloak], body .ng-cloak, body .x-ng-cloak {
+    display: none !important; }
   body h1 {
     text-align: center;
     text-transform: uppercase;
     margin: 40px auto; }
-  body header .logo {
-    margin-top: 20px; }
-  body header nav.main {
-    width: 100%;
-    margin-top: 20px; }
-    body header nav.main ul {
-      list-style-type: none;
-      display: inline-flex;
-      justify-content: flex-end;
-      width: 100%;
+  body header {
+    margin-bottom: 30px; }
+    body header .logo {
+      margin-top: 20px; }
+    body header .no-padding {
       padding: 0; }
-    body header nav.main li {
-      padding: 10px 20px; }
-    body header nav.main a {
-      text-decoration: none; }
-  body .reps h3 {
-    text-align: center; }
-  body .reps form input {
+    body header nav.main {
+      width: 100%;
+      margin-top: 10px; }
+      body header nav.main ul {
+        list-style-type: none;
+        display: inline-flex;
+        justify-content: flex-end;
+        width: 100%;
+        padding: 0; }
+      body header nav.main li {
+        padding: 10px 0 10px 20px;
+        text-transform: uppercase; }
+      body header nav.main a {
+        text-decoration: none;
+        color: #5898D8; }
+  body .reps {
     margin: 0 auto;
-    display: block;
-    width: auto; }
-  body .reps ul {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 50px; }
-    body .reps ul li {
-      text-align: center;
-      font-size: 40px;
-      color: #5FA5E2;
-      text-transform: uppercase; }
+    width: 100%; }
+    body .reps .col-md-6 {
+      padding: 0; }
+    body .reps h3 {
+      text-align: center; }
+    body .reps form input {
+      display: inline;
+      width: auto; }
+    body .reps form .get-reps-btn {
+      background: #5898D8;
+      color: #FFF;
+      border: 1px solid #5898D8;
+      text-transform: uppercase;
+      height: 1.5em;
+      padding: 0 10px; }
+    body .reps ul {
+      list-style-type: none;
+      padding: 0; }
+      body .reps ul li {
+        text-align: center;
+        font-size: 14px;
+        color: #3A3A3A;
+        display: inline-block;
+        text-transform: capitalize; }
+    body .reps .main-dash {
+      display: flex;
+      margin-top: 40px;
+      min-height: 70vh; }
+      body .reps .main-dash .group-container {
+        min-height: 50%;
+        height: 50%; }
+        body .reps .main-dash .group-container p.group-label {
+          background-color: #CA3E41;
+          color: #FFF;
+          text-transform: uppercase;
+          text-align: center;
+          width: 100%;
+          padding: 5px;
+          margin-bottom: 0; }
+        body .reps .main-dash .group-container ul {
+          margin-bottom: 0; }
+      body .reps .main-dash .graph-container {
+        background-color: #5898D8;
+        color: #FFF;
+        text-align: center;
+        height: 70vh;
+        min-height: 70vh; }
+        body .reps .main-dash .graph-container p {
+          padding-top: 40%; }
 
 /*# sourceMappingURL=style.css.map */
