@@ -105,20 +105,14 @@ def get_vote_menu_query():
     for i in range(1989, current_year+1):
         if query_counter == 0:
             query_str += """
-            (congress = {}
-            and session = {}
-            and vote_date <= {})""".format(congress_num,session_num,
-                                          str(datetime.datetime.strptime(
-                    '{}-{}-{}'.format(day_query,month_query,i), 
-                    '%d-%m-%Y')).split(' ')[0])
+            (date >= '{}-01-01' and date <= '{}')""".format(i, str(datetime.datetime.strptime(
+                '{}-{}-{}'.format(day_query,month_query,i), 
+                '%d-%m-%Y')).split(' ')[0])
         elif query_counter > 0:
             query_str += """
-            or (congress = {}
-            and session = {}
-            and vote_date <= '{}')""".format(congress_num,session_num,
-                                          str(datetime.datetime.strptime(
-                    '{}-{}-{}'.format(day_query,month_query,i), 
-                    '%d-%m-%Y')).split(' ')[0])
+            or (date >= '{}-01-01' and date <= '{}')""".format(i, str(datetime.datetime.strptime(
+                '{}-{}-{}'.format(day_query,month_query,i), 
+                '%d-%m-%Y')).split(' ')[0])
         query_counter +=1
         session_num +=1
         if session_num > 2:
@@ -127,24 +121,39 @@ def get_vote_menu_query():
     return str(query_str)
 
 ## Query for highlevel vote menu
-def get_vote_menu(db):
+def get_vote_menu():
     import pandas as pd
     sql_command = """
     select * from vote_menu
-    where ({})""".format(get_vote_menu_query())
-    df = pd.read_sql_query(sql_command, db)
-    df = df.groupby(['congress', 'session', 'department']).count()['vote_id'].reset_index(drop=False)
-    df.columns = ['congress', 'session', 'department', 'num_votes']
-    df = df.loc[((df['department'] == 'house') |
-        (df['department'] == 'senate'))].reset_index(drop=True)
+    where ({})""".format(get_vote_menu_query().replace('date', 'vote_date'))
+    df = pd.read_sql_query(sql_command, get_db())
+    ## Add year to group by
+    df['year'] = df['vote_date'].apply(lambda x: pd.to_datetime(x).year)
+    df = df.groupby(['year']).count()['vote_id'].reset_index(drop=False)
+    df.columns = ['year', 'num_votes']
     ## Get avearge for each department
-    house_avg = df.loc[df['department'] == 'house', 'num_votes'].mean()
-    senate_avg = df.loc[df['department'] == 'senate', 'num_votes'].mean()
-    ## Get comparision for each department
-    df.loc[df['department'] == 'house','num_votes_compared_to_avg'] = df.loc[
-        df['department'] == 'house', 'num_votes'].apply(lambda x: x - house_avg)
-    df.loc[df['department'] == 'senate','num_votes_compared_to_avg'] = df.loc[
-        df['department'] == 'senate', 'num_votes'].apply(lambda x: x - senate_avg)
+    avg_action = df.loc[:, 'num_votes'].mean()
+    # ## Get comparision for each department
+    df.loc[:,'num_votes_compared_to_avg'] = df.loc[:, 'num_votes'].apply(lambda x: x - avg_action)
+
+    ## Transpose the data to send it to
+    ## dictionary form. Once its in dict
+    ## it can easily jsonify.
+    df = df.transpose().to_dict()
+    return df
+
+## Query congress vote menu with average
+def get_congress_vote_menu():
+    import pandas as pd
+    sql_command = """
+    select * from congress_vote_menu
+    where ({})""".format(get_vote_menu_query())
+    df = pd.read_sql_query(sql_command, get_db())
+
+    df = df.groupby(['congress', 'session']
+        ).count().reset_index(drop=False)[['congress', 'session', 'roll']]
+    df.loc[:, 'compared_to_avg'] = df.loc[:, 'roll'].apply(
+        lambda x: x - df.loc[:, 'roll'].mean())
 
     df = df.transpose().to_dict()
     return df
@@ -176,11 +185,13 @@ def show_entries():
         ## Query the data base for homepage info
         senator_result = get_senator(state_short)
         congress_result = get_congress_leader(state_long, district)
-        vote_menu_data = get_vote_menu(get_db())
+        vote_menu_data = get_vote_menu()
+        congress_vote_menu = get_congress_vote_menu()
 
         # Return results
         return jsonify(results=(senator_result,
-            congress_result,vote_menu_data))
+            congress_result,vote_menu_data,
+            congress_vote_menu))
     except:
         return jsonify(results = None)
 
