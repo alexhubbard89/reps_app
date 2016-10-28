@@ -127,6 +127,7 @@ def get_vote_menu_query():
     return str(query_str)
 
 ## Query for highlevel vote menu
+# Probs remove this
 def get_vote_menu(db):
     import pandas as pd
     sql_command = """
@@ -163,6 +164,35 @@ def get_congress_leader(state_long, district):
             and ({});""".format(state_long, district))]
     return congress_result
 
+## Return you congress persons recent votes
+def get_congress_persons_votes(congress_result):
+    query = ''
+    for i in range(len(congress_result)):
+        if i == 0:
+            query += "bioguide_id = '{}'".format(congress_result[i]['bioguide_id'])
+        elif i > 0:
+            query += " or bioguide_id = '{}'".format(congress_result[i]['bioguide_id'])
+
+    ## Query db
+    """Get 5 most recent votes for each 
+    congress person"""
+    sql_command = """
+    select congress_member_tbl.*, congress_vote_menu.roll, congress_vote_menu.title_description
+    from (select * from congressional_votes_tbl
+    where ({})
+    and year = (select max(year) from congressional_votes_tbl)
+    and roll >= (select max(roll) from congressional_votes_tbl) - 5) 
+    as congress_member_tbl
+    left join congress_vote_menu
+    on (congress_member_tbl.congress = congress_vote_menu.congress
+    and congress_member_tbl.session = congress_vote_menu.session
+    and congress_member_tbl.roll = congress_vote_menu.roll);""".format(query)
+
+    congress_person_votes = [r for r in dict_gen(sql_command)]
+    return congress_person_votes
+
+
+
 
 @app.route('/api', methods=['POST'])
 def show_entries():
@@ -176,11 +206,11 @@ def show_entries():
         ## Query the data base for homepage info
         senator_result = get_senator(state_short)
         congress_result = get_congress_leader(state_long, district)
-        vote_menu_data = get_vote_menu(get_db())
+        congress_person_votes = get_congress_persons_votes(congress_result)
 
         # Return results
         return jsonify(results=(senator_result,
-            congress_result,vote_menu_data))
+            congress_result, congress_person_votes))
     except:
         return jsonify(results = None)
 
