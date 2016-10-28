@@ -113,17 +113,15 @@ for i in range(len(df_vm)):
     roll_num = df_vm.loc[i, 'roll']
     congress = df_vm.loc[i, 'congress']
     session = df_vm.loc[i, 'session']
-    if (((year != 2011) & (roll_num != 484)) & 
-        ((year != 2012) & (roll_num != 327))):
-        if year != year_pervious:
-            print year
-            year_pervious = year
-        print roll_num
+    if year != year_pervious:
+        print year
+        year_pervious = year
+    print roll_num
 
-        df = pd.DataFrame()
-        df = df.append(get_congress_votes(year, roll_num, congress, session))
-        if len(df) > 1:
-            put_into_sql(df)
+    df = pd.DataFrame()
+    df = df.append(get_congress_votes(year, roll_num, congress, session))
+    if len(df) > 1:
+        put_into_sql(df)
 
 
 
