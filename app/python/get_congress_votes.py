@@ -102,7 +102,7 @@ cursor = connection.cursor()
 ## Query db
 sql_command = """
 select * from congress_vote_menu
-where date >= '2016-01-01';"""
+where date >= '1990-01-01';"""
 df_vm = pd.read_sql_query(sql_command, connection)
 df_vm['year'] = df_vm['date'].apply(lambda x: pd.to_datetime(x).year)
 
