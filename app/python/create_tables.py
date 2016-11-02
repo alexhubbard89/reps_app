@@ -81,6 +81,39 @@ sql_command = """
     roll_id PRIMARY KEY);"""
 cursor.execute(sql_command)
 
+## Create congressional vote table
+sql_command = """
+    CREATE TABLE congressional_votes_tbl (
+    member_full varchar(255),
+    bioguide_id varchar(255),
+    party varchar(255),
+    role varchar(255),
+    state varchar(255),
+    vote varchar(255),
+    year DATE, 
+    roll varchar(255),
+    congress int,
+    session int,
+    date DATE);"""
+cursor.execute(sql_command)
+
+## Create senator vote table 
+sql_command = """
+CREATE TABLE senator_votes_tbl (
+            first_name varchar(255),
+            last_name varchar(255),
+            lis_member_id varchar(255),
+            member_full varchar(255),
+            party varchar(255), 
+            state varchar(255), 
+            vote_cast varchar(255),
+            roll int,
+            congress int,
+            session int,
+            date DATE
+            year DATE);"""
+
+cursor.execute(sql_command)
 # never forget this, if you want the changes to be saved:
 connection.commit()
 connection.close()
