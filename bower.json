@@ -1,0 +1,23 @@
+{
+  "name": "reps_app",
+  "description": "Now taking recommendations",
+  "main": "main.js",
+  "authors": [
+    "Kim Hart"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/alexhubbard89/reps_app",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "^3.3.6",
+    "react": "^15.1.0"
+  }
+}
+
