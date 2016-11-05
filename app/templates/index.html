@@ -5,31 +5,20 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge">
         <title>Reps App</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css">
-        <link rel="stylesheet" href="{{ url_for('static', filename='lib/tether/tether.min.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/css/style.css') }}"> 
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/css/vendors/skeleton/skeleton.css') }}">
+          <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/css/main.css') }}">
     </head>
-    <body ng-cloak class="ng-cloak">
-      <header class="container">
+    <body class="container" ng-cloak class="ng-cloak">
+      <header>
         <div class="row">
-          <div class="col-md-2 logo">
-            <h3>REPS!</h3>
-          </div>
-          <div class="col-md-10">
-            <nav class="main" ng-controller="NavCtrl">
-              <ul class="nav navbar-nav">
-                <li ng-class="{active: isActive('/')}"><a href="/"></i>Dashboard</a></li>
-                <li ng-class="{active: isActive('/profile')}"><a href="#">Profile</a></li>
-                <li ng-class="{active: isActive('/about')}"><a href="#">About</a></li>
-              </ul>
-            </nav>
+          <div class="two columns logo">
+            <h3>LOGO</h3>
           </div>
         </div>
       </header>
-      <div class="reps container" ng-controller="RepsCtrl">
+      <div class="reps" ng-controller="RepsCtrl">
         <div class="row">
-          <div class="col-md-12">
+          <div class="twelve columns">
             <label>Enter your ZIP code:</label>
             <form name="zipForm" role="form" ng-submit="getReps()">
               <input type="tel" ng-model="zipcode" name="zipcode">
@@ -37,40 +26,37 @@
             </form>
           </div>
         </div>
-        <div class="row main-dash">
-          <div class="col-md-6 rep-photos">
-            {% raw %}
-            <div class="row group-container">
-              <p class="group-label">Senate</p>
-              <ul class="senator-list">
-                <li ng-repeat="senator in senators track by $index"><!-- {{ senator.first_name }} {{ senator.last_name }} --><img class="photo-id" ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
-              </ul>
-            </div>
-            <div class="row group-container">
-              <p class="group-label">Congress</p>
-              <ul class="congress-list">
-                <li ng-repeat="congress in congress track by $index"><!-- {{ congress.name }} --><img class="photo-id" ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
-              </ul>
-            </div>
-            {% endraw %}
+      </div>
+      {% raw %}
+      <div class="row main-dash">
+        <div class="six columns rep-photos"> <!-- half the page -->
+          <div class="row">
+            <p>Senate</p>
+            <ul>
+              <li ng-repeat="senator in senators track by $index"><!-- {{ senator.first_name }} {{ senator.last_name }} -->
+              <img class="photo-id" ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
+            </ul>
           </div>
-          <div class="col-md-6">
-            <div class="graph-container">
-              <p>This is a placeholder for D3!</p>
-            </div>
+          <div class="row">
+            <p>Congress</p>
+            <ul>
+              <li ng-repeat="congress in congress track by $index"><!-- {{ congress.name }} -->
+              <img class="photo-id" ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
+            </ul>
+          </div>
+        </div>
+        <div class="six columns"> <!-- half the page -->
+          <div class="graph-container">
+            <p>This is a placeholder for D3 graphs!</p>
           </div>
         </div>
       </div>
-      <div class="scripts">
-        <script src="http://code.jquery.com/jquery-1.12.4.min.js"></script>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
-        <script src="{{ url_for('static', filename='lib/tether/tether.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
-        <script src="{{ url_for('static', filename='bower_components/react/react-dom.min.js') }}"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
-        <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-      </div>
+      {% endraw %}
+      <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+      <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+      <script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='bower_components/react/react-dom.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     </body>
 </html>

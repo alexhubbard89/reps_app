@@ -206,17 +206,24 @@ def show_entries():
         ## Query the data base for homepage info
         senator_result = get_senator(state_short)
         congress_result = get_congress_leader(state_long, district)
-        congress_person_votes = get_congress_persons_votes(congress_result)
+        # congress_person_votes = get_congress_persons_votes(congress_result)
 
         # Return results
         return jsonify(results=(senator_result,
-            congress_result, congress_person_votes))
+            congress_result))
     except:
         return jsonify(results = None)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
+
+
+@app.route('/welcome', methods=['GET', 'POST'])
+def welcome():
+    return render_template('welcome.html')
+
 
 
 if __name__ == '__main__':

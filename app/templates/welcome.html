@@ -1,0 +1,26 @@
+<!doctype html>
+<html ng-app="RepsApp" lang="eng">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Reps App</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/css/vendors/skeleton/skeleton.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/css/main.css') }}"> 
+    </head>
+    <body ng-cloak class="ng-cloak">
+      <div class="main">
+        <div class="container">
+          <div class="row">
+            <h1 class="welcome-logo">LOGO</h1>
+          </div>
+        </div>
+      </div>
+      <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
+      <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js"></script>
+      <script src="{{ url_for('static', filename='bower_components/react/react.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='bower_components/react/react-dom.min.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/controllers.js') }}"></script>
+      <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    </body>
+</html>
