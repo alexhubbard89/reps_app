@@ -11,19 +11,35 @@ import json
 import requests
 from bs4 import BeautifulSoup
 from pandas.io.json import json_normalize
+import os
+import psycopg2
+import urlparse
 ## Im importing US for now, later I should just make the 
 ## data base properly
 import us
 
 
 app = Flask(__name__)
-
-DATABASE = 'rep_app.db'
-
 app.config.from_object(__name__)
+## If you want to connet to sqlite use this
+#DATABASE = 'rep_app.db'
 
-def connect_to_database():
-    return sqlite3.connect(app.config['DATABASE'])
+urlparse.uses_netloc.append("postgres")
+creds = pd.read_json('app/db_creds.json').loc[0,'creds']
+
+connection = psycopg2.connect(
+    database=creds['database'],
+    user=creds['user'],
+    password=creds['password'],
+    host=creds['host'],
+    port=creds['port']
+)
+cursor = connection.cursor()
+
+
+## If you want to connet to sqlite use this
+#def connect_to_database():
+#    return sqlite3.connect(app.config['DATABASE'])
 
 def get_db():
     db = getattr(g, 'db', None)
@@ -41,10 +57,10 @@ def dict_gen(sql_query):
     """Turn sqlite3 query into dicitonary. This is Essential
     for returning json results. jsonify will not return sqlite3
     results because its a table, but it will return dic results."""
-    curs = get_db().execute(sql_query)
-    field_names = [d[0].lower() for d in curs.description]
+    cursor.execute(sql_query)
+    field_names = [d[0].lower() for d in cursor.description]
     while True:
-        rows = curs.fetchmany()
+        rows = cursor.fetchmany()
         if not rows: return
         for row in rows:
             yield dict(itertools.izip(field_names, row))
@@ -64,7 +80,7 @@ def get_state_by_zip(zip_code):
         for i in range(len(x['types'])):
             if u'administrative_area_level_1' in x.loc[i, 'types']:
         ## Save state from zipcode
-                state = x.loc[i, 'short_name'].upper()
+                state = str(x.loc[i, 'short_name'].upper())
 
         return state
     except IndexError:
@@ -84,9 +100,9 @@ def get_district_num(zip_code,state_short):
     total_query = ''
     for district_num in range(1, len(x)):
         if first_query == 0:
-            total_query += "district = {}".format(str(x[district_num].split('_')[0]))
+            total_query += "district = '{}'".format(int(str(x[district_num].split('_')[0])))
         if first_query > 0:
-            total_query += " or district = {}".format(str(x[district_num].split('_')[0]))
+            total_query += " or district = '{}'".format(int(str(x[district_num].split('_')[0])))
         first_query += 1
     return total_query
 
@@ -198,19 +214,26 @@ def get_congress_persons_votes(congress_result):
 def show_entries():
     data = json.loads(request.data.decode())
     zip_code = data["zipcode"]
+    state_short =  get_state_by_zip(zip_code)
+    state_long = str(us.states.lookup(state_short))
+    district = get_district_num(zip_code,state_short)
+
+    ## Query the data base for homepage info
     try:
-        state_short =  get_state_by_zip(zip_code)
-        state_long = str(us.states.lookup(state_short))
-        district = get_district_num(zip_code,state_short)
-
-        ## Query the data base for homepage info
         senator_result = get_senator(state_short)
+    except:
+        senator_result = None
+    try:
         congress_result = get_congress_leader(state_long, district)
-        congress_person_votes = get_congress_persons_votes(congress_result)
+    except:
+        congress_result = None
 
+    #congress_person_votes = get_congress_persons_votes(congress_result)
+
+    try:
         # Return results
-        return jsonify(results=(senator_result,
-            congress_result, congress_person_votes))
+        return jsonify(results=(senator_result, 
+            congress_result))
     except:
         return jsonify(results = None)
 

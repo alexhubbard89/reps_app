@@ -37,13 +37,22 @@ def get_bio_image(df):
     return df
 
 def put_into_sql(data_set):
-    import sqlite3
+    import os
+    import psycopg2
+    import urlparse
     import pandas as pd
-    from sqlalchemy import create_engine
 
-    connection = sqlite3.connect("../../rep_app.db")
+    urlparse.uses_netloc.append("postgres")
+    creds = pd.read_json('../db_creds.json').loc[0,'creds']
+
+    connection = psycopg2.connect(
+        database=creds['database'],
+        user=creds['user'],
+        password=creds['password'],
+        host=creds['host'],
+        port=creds['port']
+    )
     cursor = connection.cursor()
-    
 
     ## delete 
     # I'm deleting to make sure we have the most
@@ -113,9 +122,24 @@ def get_senate_by_gov(df):
     from xmljson import badgerfish as bf
     from xml.etree.ElementTree import fromstring
     from pandas.io.json import json_normalize
-
+    import urllib
+    
+    """Some of the urls don't work the first time,
+    but by setting a proxy requests sends info to 
+    senate.gov to connect to the page"""
+    s = requests.Session()
+    s.auth = ('user', 'pass')
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+    }
     url = 'http://www.senate.gov/general/contact_information/senators_cfm.xml'
-    r = requests.get(url)
+    print url
+    r =  requests.get(url, headers=headers, proxies=urllib.getproxies())
+
+
+
+    #url = 'http://www.senate.gov/general/contact_information/senators_cfm.xml'
+    #r = requests.get(url)
     df = json_normalize(pd.DataFrame(bf.data(fromstring(r.content))).loc['member', 'contact_information'])
     df.columns = df.columns.str.replace('$', '').str.replace('.', '')
 

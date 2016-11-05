@@ -75,10 +75,21 @@ def get_congress_vote_menu(year):
 
 
 def put_into_sql(df):
-    import sqlite3
+    import os
+    import psycopg2
+    import urlparse
     import pandas as pd
-    
-    connection = sqlite3.connect("../../rep_app.db")
+
+    urlparse.uses_netloc.append("postgres")
+    creds = pd.read_json('/Users/Alexanderhubbard/Documents/projects/reps_app/app/db_creds.json').loc[0,'creds']
+
+    connection = psycopg2.connect(
+        database=creds['database'],
+        user=creds['user'],
+        password=creds['password'],
+        host=creds['host'],
+        port=creds['port']
+    )
     cursor = connection.cursor()
 
     
@@ -87,7 +98,7 @@ def put_into_sql(df):
         x = list(df.loc[i,])
 
         for p in [x]:
-            format_str = """INSERT OR IGNORE INTO congress_vote_menu (
+            format_str = """INSERT INTO congress_vote_menu (
             roll,
             roll_link,
             date,
