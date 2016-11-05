@@ -151,11 +151,21 @@ def collect_remaining_data(df):
     return df
 
 def put_into_sql(df):
-    import sqlite3
+    import os
+    import psycopg2
+    import urlparse
     import pandas as pd
-    
-    connection = sqlite3.connect("../../rep_app.db")
 
+    urlparse.uses_netloc.append("postgres")
+    creds = pd.read_json('../db_creds.json').loc[0,'creds']
+
+    connection = psycopg2.connect(
+        database=creds['database'],
+        user=creds['user'],
+        password=creds['password'],
+        host=creds['host'],
+        port=creds['port']
+    )
     cursor = connection.cursor()
 
     ## delete 
@@ -169,24 +179,35 @@ def put_into_sql(df):
 
     # Create table
     sql_command = """
-    CREATE TABLE current_congress_bio (
-    name varchar(255), 
-    bioguide_id PRIMARY KEY,  
-    state varchar(255), 
-    district int, 
-    party varchar(255), 
-    year_elected YEAR, 
-    bio_text LONGTEXT,
-    leadership_position varchar(255),
-    website Hyperlink,
-    address varchar(255),
-    phone varchar(255),
-    email Hyperlink, 
-    image BOOLEAN);"""
+        CREATE TABLE current_congress_bio (
+        name varchar(255), 
+        bioguide_id varchar(255) PRIMARY KEY,  
+        state varchar(255), 
+        district varchar(255), 
+        party varchar(255), 
+        year_elected int, 
+        bio_text TEXT,
+        leadership_position varchar(255),
+        website varchar(255),
+        address varchar(255),
+        phone varchar(255),
+        email varchar(255), 
+        image BOOLEAN);"""
     cursor.execute(sql_command)
 
     ## Put data into table
     for i in range(len(df)):
+        print i
+        df.loc[i, 'bio_text'] = df.loc[i, 'bio_text'].replace("'", "''")
+        try:
+            df.loc[i, 'bio_text'] = df.loc[i, 'bio_text'].encode(
+                'UTF-8').replace('\xc2\x92',"''").replace('\xc2', "''").replace('\xe2\x80\x99',"''").replace('\x92','')
+        except:
+            'placehold'
+        try:
+            df.loc[i, 'bio_text'] = str(df.loc[i, 'bio_text'])
+        except:
+            'placeholder'
         x = list(df.loc[i,])
 
         for p in [x]:
@@ -204,24 +225,15 @@ def put_into_sql(df):
             phone,
             email,
             image)
-            VALUES ("{name}", "{bioguide_id}", "{state}", "{district}", "{party}", "{year_elected}", 
-            "{bio_text}", "{leadership_position}", "{website}", "{address}", "{phone}",
-            "{email}", "{image}");"""
+            VALUES ('{name}', '{bioguide_id}', '{state}', '{district}', '{party}', '{year_elected}', 
+            '{bio_text}', '{leadership_position}', '{website}', '{address}', '{phone}',
+            '{email}', '{image}');"""
 
             sql_command = format_str.format(name=p[0], bioguide_id=p[1], state=p[2], district=p[3], 
                                             party=p[4], year_elected=p[5], bio_text=p[6], 
                                             leadership_position=p[7], website=p[8],
                                             address=p[9], phone=p[10], email=p[11], image=p[12])
-            try:
-                cursor.execute(sql_command)
-            except:
-                try:
-                    cursor.execute(sql_command.replace('"', "'"))
-                except:
-                    try:
-                        cursor.execute(sql_command.replace('"', ""))
-                    except:
-                        'one of those should put into sql'
+            cursor.execute(sql_command)
     # never forget this, if you want the changes to be saved:
     connection.commit()
     connection.close()

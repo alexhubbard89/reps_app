@@ -36,30 +36,41 @@ def get_bio_image(df):
             df.loc[i, 'image'] = False
     return df
 
+## Make Function to put current senate bio in postgres
 def put_into_sql(data_set):
-    import sqlite3
+    import os
+    import psycopg2
+    import urlparse
     import pandas as pd
-    from sqlalchemy import create_engine
 
-    connection = sqlite3.connect("../rep_app.db")
+    urlparse.uses_netloc.append("postgres")
+    creds = pd.read_json('../db_creds.json').loc[0,'creds']
+
+    connection = psycopg2.connect(
+        database=creds['database'],
+        user=creds['user'],
+        password=creds['password'],
+        host=creds['host'],
+        port=creds['port']
+    )
     cursor = connection.cursor()
 
     ## delete 
     # I'm deleting to make sure we have the most
     # up-to-date reps. The collection is small
     # so it's not a bottle next to do this.
+
     try:
         cursor.execute("""DROP TABLE current_senate_bio;""")
     except:
         'table did not exist'
 
-    ## Create table
     sql_command = """
     CREATE TABLE current_senate_bio (
-    address varchar(255), 
-    bioguide_id PRIMARY KEY, 
+    address TEXT, 
+    bioguide_id varchar(255) PRIMARY KEY, 
     class_ varchar(255), 
-    email Hyperlink, 
+    email varchar(255), 
     first_name varchar(255), 
     last_name varchar(255), 
     leadership_position varchar(255), 
@@ -67,13 +78,24 @@ def put_into_sql(data_set):
     party varchar(255), 
     phone varchar(255), 
     state varchar(255), 
-    website Hyperlink,
-    bio_text LONGTEXT,
+    website varchar(255),
+    bio_text TEXT,
     image BOOLEAN);"""
+
     cursor.execute(sql_command)
 
-    ## Put data into table
     for i in range(len(data_set)):
+        print i
+        try:
+            data_set.loc[i, 'bio_text'] = data_set.loc[i, 'bio_text'
+                                                      ].encode(
+                'UTF-8').replace('\xc2', "''").replace('\xe2\x80\x99',"''")
+        except:
+            'placehold'
+        try:
+            data_set.loc[i, 'bio_text'] = str(data_set.loc[i, 'bio_text']).replace('\x92','')
+        except:
+            'placeholder'
         x = list(data_set.loc[i,])
 
         for p in [x]:
@@ -92,13 +114,14 @@ def put_into_sql(data_set):
             website,
             bio_text,
             image)
-            VALUES ("{address}", "{bioguide_id}", "{class_}", "{email}", "{first_name}", "{last_name}", 
-            "{leadership_position}", "{member_full}", "{party}", "{phone}", "{state}",
-            "{website}", "{bio_text}", "{image}");"""
+            VALUES ('{address}', '{bioguide_id}', '{class_}', '{email}', '{first_name}', '{last_name}', 
+            '{leadership_position}', '{member_full}', '{party}', '{phone}', '{state}',
+            '{website}', '{bio_text}', '{image}');"""
 
             sql_command = format_str.format(address=p[0], bioguide_id=p[1], class_=p[2], email=p[3], first_name=p[4], last_name=p[5], 
                               leadership_position=p[6], member_full=p[7], party=p[8],phone=p[9], state=p[10],
                               website=p[11], bio_text=p[12], image=p[13])
+            print sql_command
             cursor.execute(sql_command)
 
     # never forget this, if you want the changes to be saved:
