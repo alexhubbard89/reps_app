@@ -18,6 +18,9 @@ h2 {
 h3 {
   font-size: 22px; }
 
+p.error {
+  color: #CA3E41; }
+
 div.main {
   background-color: #5898D8;
   width: 100%;

@@ -8,7 +8,7 @@
       <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/css/vendors/skeleton/skeleton.css') }}">
       <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/css/main.css') }}">
     </head>
-    <body class="container" ng-cloak class="ng-cloak">
+    <body class="container ng-cloak" ng-cloak>
       <header>
         <div class="row">
           <div class="twelve columns logo">
@@ -24,6 +24,7 @@
               <label>Enter your ZIP code:</label>
               <input type="tel" ng-model="zipcode" name="zipcode">
               <input type="submit" ng-submit="getReps()" value="Go">
+              <p class="error" ng-show="isValid === false">Please enter a valid ZIP code.</p>
             </form>
           </div>
         </div>
@@ -32,13 +33,13 @@
         <div class="reps">
           <div class="six columns">
             <ul>
-              <li ng-repeat="senator in senators track by $index">{{ senator.first_name }} {{ senator.last_name }}
+              <li ng-repeat="senator in senators track by $index"><h3>{{ senator.first_name }} {{ senator.last_name }}</h3><br>
               <img class="photo-id" ng-src="../static/img/bio_images/{{senator.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
             </ul>
           </div>
           <div class="six columns">
             <ul>
-              <li ng-repeat="congress in congress track by $index">{{ congress.name }}
+              <li ng-repeat="congress in congress track by $index"><h3>{{ congress.name }}</h3>
               <img class="photo-id" ng-src="../static/img/bio_images/{{congress.bioguide_id}}.png" err-src="../static/img/bio_images/BLANK.png"></li>
             </ul>
           </div>

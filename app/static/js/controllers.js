@@ -7,6 +7,7 @@ app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
     let zipcode = $scope.zipcode;
     $scope.senators = [];
     $scope.congress = [];
+    $scope.isValid;
 
     $http.post('/api', {"zipcode": zipcode})
       .success(function(results) {
@@ -15,9 +16,10 @@ app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
           let congress = results.results[1];
           $scope.senators = senators;
           $scope.congress = congress;
-          console.log(results);
+          $scope.isValid = true;
+          console.log(results)
         } else {
-          console.log('Not a valid ZIP code');
+          $scope.isValid = false;
         }
       })
       .error(function(error) {
