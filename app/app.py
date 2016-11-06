@@ -182,31 +182,57 @@ def get_congress_leader(state_long, district):
 
 ## Return you congress persons recent votes
 def get_congress_persons_votes(congress_result):
-    query = ''
+
+    total_query = ''
     for i in range(len(congress_result)):
         if i == 0:
-            query += "bioguide_id = '{}'".format(congress_result[i]['bioguide_id'])
+            total_query += "bioguide_id = '{}'".format(
+                pd.DataFrame(congress_result).loc[i, 'bioguide_id'])
         elif i > 0:
-            query += " or bioguide_id = '{}'".format(congress_result[i]['bioguide_id'])
+            total_query += "or bioguide_id = '{}'".format(
+                pd.DataFrame(congress_result).loc[i, 'bioguide_id'])
 
-    ## Query db
-    """Get 5 most recent votes for each 
-    congress person"""
-    sql_command = """
-    select congress_member_tbl.*, congress_vote_menu.roll, congress_vote_menu.title_description
-    from (select * from congressional_votes_tbl
-    where ({})
-    and year = (select max(year) from congressional_votes_tbl)
-    and roll >= (select max(roll) from congressional_votes_tbl) - 5) 
-    as congress_member_tbl
-    left join congress_vote_menu
-    on (congress_member_tbl.congress = congress_vote_menu.congress
-    and congress_member_tbl.session = congress_vote_menu.session
-    and congress_member_tbl.roll = congress_vote_menu.roll);""".format(query)
+    congress_person_votes = [r for r in dict_gen("""
+        select congress_subset.*, 
+        congress_vote_menu.question, 
+        congress_vote_menu.title_description
+        from (select distinct * 
+        from congressional_votes_tbl 
+        where ({}) 
+        order by roll desc 
+        limit {}) as congress_subset
+        left join congress_vote_menu
+        on (congress_subset.roll_id = congress_vote_menu.roll_id);""".format(
+            total_query, 5*len(congress_result)))]
+    ## Chnage datetime format
+    for i in range(len(congress_person_votes)):
+        congress_person_votes[i]['date'] = pd.to_datetime(
+            congress_person_votes[i]['date'])
 
-    congress_person_votes = [r for r in dict_gen(sql_command)]
     return congress_person_votes
 
+## Return you senators recent votes
+def get_senator_votes(state_short, senator_result):
+
+    senator_votes = [r for r in dict_gen("""
+       select senate_subset.*,
+        senate_vote_menu.title,
+        senate_vote_menu.question
+        from (select distinct * 
+        from senator_votes_tbl
+        where lower(state) = lower('{}')
+        order by roll desc 
+        limit {})
+        as senate_subset
+        left join senate_vote_menu
+        on (senate_subset.roll_id = senate_vote_menu.vote_id);""".format(
+                state_short, 5*len(senator_result)))]
+    ## Change datetime format
+    for i in range(len(senator_votes)):
+        senator_votes[i]['date'] = pd.to_datetime(
+            senator_votes[i]['date'])
+        
+    return senator_votes
 
 
 
@@ -227,15 +253,17 @@ def show_entries():
         congress_result = get_congress_leader(state_long, district)
     except:
         congress_result = None
-
-    #congress_person_votes = get_congress_persons_votes(congress_result)
-
     try:
-        # Return results
-        return jsonify(results=(senator_result, 
-            congress_result))
+        congress_person_votes = get_congress_persons_votes(congress_result)
     except:
-        return jsonify(results = None)
+        congress_person_votes = None
+    senator_votes = get_senator_votes(state_short, senator_result)
+
+    # Return results
+    return jsonify(results=(senator_result, 
+        congress_result, congress_person_votes,
+        senator_votes))
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
