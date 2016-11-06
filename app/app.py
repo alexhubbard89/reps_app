@@ -241,28 +241,54 @@ def show_entries():
     data = json.loads(request.data.decode())
     zip_code = data["zipcode"]
     state_short =  get_state_by_zip(zip_code)
-    state_long = str(us.states.lookup(state_short))
-    district = get_district_num(zip_code,state_short)
+    try:
+        state_long = str(us.states.lookup(state_short))
+        district = get_district_num(zip_code,state_short)
+    except:
+        'placeholding because of the zip code bug'
+    senator_result = None
+    congress_result = None
+    congress_person_votes = None
+    senator_votes = None
 
     ## Query the data base for homepage info
     try:
         senator_result = get_senator(state_short)
     except:
-        senator_result = None
+        'placeholder'
     try:
         congress_result = get_congress_leader(state_long, district)
     except:
-        congress_result = None
+        'placeholder'
     try:
         congress_person_votes = get_congress_persons_votes(congress_result)
     except:
-        congress_person_votes = None
-    senator_votes = get_senator_votes(state_short, senator_result)
+        'placeholder'
+    try:
+        senator_votes = get_senator_votes(state_short, senator_result)
+    except:
+        'placeholder'
 
     # Return results
-    return jsonify(results=(senator_result, 
-        congress_result, congress_person_votes,
-        senator_votes))
+    if ((senator_result != None) and
+        (congress_result != None) and
+        (congress_person_votes != None) and
+        (senator_votes != None)):
+        return jsonify(results=(senator_result, 
+            congress_result, congress_person_votes,
+            senator_votes))
+    else: 
+        return jsonify(results=None)
+    # try:
+    #     if ((len(senator_result)+
+    #         len(congress_result)+
+    #         len(congress_person_votes)+
+    #         len(senator_votes)) > 0):
+    #             return jsonify(results=(senator_result, 
+    #                 congress_result, congress_person_votes,
+    #                 senator_votes))
+    # except:
+    #     return jsonify(results=None)
 
 
 @app.route('/', methods=['GET', 'POST'])
