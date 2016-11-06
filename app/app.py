@@ -279,16 +279,6 @@ def show_entries():
             senator_votes))
     else: 
         return jsonify(results=None)
-    # try:
-    #     if ((len(senator_result)+
-    #         len(congress_result)+
-    #         len(congress_person_votes)+
-    #         len(senator_votes)) > 0):
-    #             return jsonify(results=(senator_result, 
-    #                 congress_result, congress_person_votes,
-    #                 senator_votes))
-    # except:
-    #     return jsonify(results=None)
 
 
 @app.route('/', methods=['GET', 'POST'])
