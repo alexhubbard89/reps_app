@@ -12,12 +12,10 @@ app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
     $http.post('/api', {"zipcode": zipcode})
       .success(function(results) {
         if (results.results) {
-          let senators = results.results[0];
-          let congress = results.results[1];
-          $scope.senators = senators;
-          $scope.congress = congress;
+          $scope.senators = results.results[0];
+          $scope.congress = results.results[1];
           $scope.isValid = true;
-          console.log(results)
+          console.log($scope.senators[0].first_name)
         } else {
           $scope.isValid = false;
         }
@@ -28,6 +26,8 @@ app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
     };
   }
 ]); // SenatorsCtrl
+
+
 
 
 

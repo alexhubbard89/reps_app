@@ -4,3 +4,13 @@ div.logo {
   }
 }
 
+div.reps {
+  ul {
+    list-style-type: none;
+    display: inline-flex;
+  }
+
+  img {
+    border-radius: 50%;
+  }
+}

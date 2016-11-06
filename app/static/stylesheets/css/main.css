@@ -5,7 +5,7 @@ h1, h2, h3, p, ul, li, a, label, input {
   font-family: "Raleway", sans-serif;
   line-height: 1.5em; }
 
-p, ul, li, a, label, input {
+p, li, a, label, input {
   font-size: 13px; }
 
 h1 {
@@ -34,3 +34,10 @@ div.main {
 
 div.logo h1 {
   padding-top: 20px; }
+
+div.reps ul {
+  list-style-type: none;
+  display: inline-flex; }
+
+div.reps img {
+  border-radius: 50%; }
