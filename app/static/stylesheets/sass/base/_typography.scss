@@ -1,0 +1,25 @@
+h1, h2, h3, p, ul, li, a, label, input {
+ font-family: $raleway-font;
+ line-height: $standard-line-height;
+}
+
+p,  li, a, label, input {
+  font-size: $paragraph-size;
+}
+
+h1 {
+  color: $blue-color;
+  font-size: $standard-h1;
+}
+
+h2 {
+  font-size: $standard-h2;
+}
+
+h3 {
+  font-size: $standard-h3;
+}
+
+p.error {
+  color: $red-color;
+}

@@ -7,17 +7,17 @@ app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
     let zipcode = $scope.zipcode;
     $scope.senators = [];
     $scope.congress = [];
+    $scope.isValid;
 
     $http.post('/api', {"zipcode": zipcode})
       .success(function(results) {
         if (results.results) {
-          let senators = results.results[0];
-          let congress = results.results[1];
-          $scope.senators = senators;
-          $scope.congress = congress;
-
+          $scope.senators = results.results[0];
+          $scope.congress = results.results[1];
+          $scope.isValid = true;
+          console.log($scope.senators[0].first_name)
         } else {
-          console.log('Not a valid ZIP code')
+          $scope.isValid = false;
         }
       })
       .error(function(error) {
@@ -27,21 +27,7 @@ app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
   }
 ]); // SenatorsCtrl
 
-app.controller('NavCtrl', function($scope, $location) {
-  $scope.isActive = function(route) {
-    return route === $location.path();
-  }
-});// NavCtrl
 
-app.directive('errSrc', function() {
-  return {
-    link: function(scope, element, attrs) {
-      element.bind('error', function() {
-        if (attrs.src != attrs.errSrc) {
-          attrs.$set('src', attrs.errSrc);
-        }
-      });
-    }
-  }
-});
+
+
 

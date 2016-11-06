@@ -10,13 +10,13 @@ var sass = require('gulp-sass');
 // tasks
 
 gulp.task('sass', function () {
-  return gulp.src('app/static/css/sass/**/*.scss')
+  return gulp.src('app/static/stylesheets/sass/main.scss')
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('app/static/css/css'));
+    .pipe(gulp.dest('app/static/stylesheets/css'));
 });
  
 gulp.task('watch', function () {
-  gulp.watch('app/static/css/sass/**/*.scss', ['sass']);
+  gulp.watch('app/static/stylesheets/sass/**/*.scss', ['sass']);
 });
 
 gulp.task('default', ['watch']);
