@@ -1,9 +1,22 @@
 @import url("https://fonts.googleapis.com/css?family=Raleway");
 @import url("https://fonts.googleapis.com/css?family=Muli");
 @import url("https://fonts.googleapis.com/css?family=Roboto");
-h1 {
+h1, h2, h3, p, ul, li, a, label, input {
   font-family: "Raleway", sans-serif;
-  color: #5898D8; }
+  line-height: 1.5em; }
+
+p, ul, li, a, label, input {
+  font-size: 13px; }
+
+h1 {
+  color: #5898D8;
+  font-size: 32px; }
+
+h2 {
+  font-size: 28px; }
+
+h3 {
+  font-size: 22px; }
 
 div.main {
   background-color: #5898D8;
@@ -15,3 +28,6 @@ div.main {
     text-align: center;
     font-size: 26px;
     padding: 10px; }
+
+div.logo h1 {
+  padding-top: 20px; }

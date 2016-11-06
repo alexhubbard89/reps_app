@@ -4,6 +4,20 @@
 @import url('https://fonts.googleapis.com/css?family=Muli');
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
+// TYPOGRAPHY
+// ----------------------------------------------
+
+$raleway-font: 'Raleway', sans-serif;
+$muli-font: 'Muli', sans-serif;
+$roboto-font: 'Roboto', sans-serif;
+
+$logo-size: 26px;
+$paragraph-size: 13px;
+$standard-line-height: 1.5em;
+$standard-h1: 32px;
+$standard-h2: 28px;
+$standard-h3: 22px;
+
 // BRAND COLORS
 // ----------------------------------------------
 $red-color: #CA3E41;
@@ -12,9 +26,5 @@ $lightblue-color: #8CD7FC;
 $white-color: #FFF;
 $gray-color: #3A3A3A;
 
-// TYPOGRAPHY
-// ----------------------------------------------
 
-$raleway-font: 'Raleway', sans-serif;
-$muli-font: 'Muli', sans-serif;
-$roboto-font: 'Roboto', sans-serif;
+
