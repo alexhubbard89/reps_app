@@ -1,4 +1,4 @@
-var app = angular.module("RepsApp", ['directives.rep']);
+var app = angular.module("RepsApp", []);
 
 app.controller('RepsCtrl', ['$scope', '$http', function($scope, $http) {
 
