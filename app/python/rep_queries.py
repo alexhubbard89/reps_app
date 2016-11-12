@@ -14,9 +14,9 @@ from pandas.io.json import json_normalize
 import os
 import psycopg2
 import urlparse
-## Im importing US for now, later I should just make the 
-## data base properly
 import us
+import math
+from scipy import stats
 
 
 urlparse.uses_netloc.append("postgres")
@@ -171,8 +171,8 @@ def get_congress_leader(zip_code):
     return congress_result
 
 ## Return you congress persons recent votes
-def get_congress_persons_votes(congress_result):
-
+def get_congress_persons_votes(zip_code):
+    congress_result = get_congress_leader(zip_code)
     total_query = ''
     for i in range(len(congress_result)):
         if i == 0:
@@ -201,7 +201,7 @@ def get_congress_persons_votes(congress_result):
 
     return congress_person_votes
 
-## Return you senators recent votes
+## Return your senators recent votes
 def get_senator_votes(zip_code):
     state_short = get_state_by_zip(zip_code)
     senator_result = get_senator(zip_code)
@@ -227,26 +227,76 @@ def get_senator_votes(zip_code):
     return senator_votes
 
 
+## Get the number of days your congressperson missed
+def get_congress_days_missed(zip_code):
 
+    query = """
+    select *
+    from
+    (select bioguide_id, 
+    count(votes_missed) as num_days_missed
+    from
+    (select votes_missed_df.*, 
+    total_votes.total_votes
+    from (select date, bioguide_id, count(distinct(roll_id)) as votes_missed
+    from congressional_votes_tbl
+    where lower(vote) = 'not voting'
+    GROUP BY date, bioguide_id
+    ORDER BY date, bioguide_id) as votes_missed_df
+    left join (select date, 
+    count(distinct(roll_id)) as total_votes
+    from congressional_votes_tbl
+    GROUP BY date
+    ORDER BY date) as total_votes
+    on votes_missed_df.date = total_votes.date) 
+    as total_v_missing
+    where votes_missed = total_votes
+    GROUP BY bioguide_id) as total_days_missed;"""
 
-# def get_senator_votes(state_short, senator_result):
+    df = pd.read_sql_query(query, connection)
 
-#     senator_votes = [r for r in dict_gen("""
-#        select senate_subset.*,
-#         senate_vote_menu.title,
-#         senate_vote_menu.question
-#         from (select distinct * 
-#         from senator_votes_tbl
-#         where lower(state) = lower('{}')
-#         order by roll desc 
-#         limit {})
-#         as senate_subset
-#         left join senate_vote_menu
-#         on (senate_subset.roll_id = senate_vote_menu.vote_id);""".format(
-#                 state_short, 5*len(senator_result)))]
-#     ## Change datetime format
-#     for i in range(len(senator_votes)):
-#         senator_votes[i]['date'] = pd.to_datetime(
-#             senator_votes[i]['date'])
+    df.loc[:, 'compared_to_avg'] = df.loc[
+        :, 'num_days_missed'].apply(lambda x: x - math.floor(df.loc[:, 'num_days_missed'].mean()))
+
+    ## Set percentil to add context
+    x = df['num_days_missed']
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+
+    congress_result = get_congress_leader(zip_code)
+    congress_result = pd.DataFrame(congress_result)
+    congress_query = ''
+    df_2 = pd.DataFrame()
+    for bioguide_id in congress_result['bioguide_id']:
+        df_2 = df_2.append(df.loc[df['bioguide_id'] == '{}'.format(bioguide_id)])
         
-#     return senator_votes
+    df_2 = pd.merge(df_2, congress_result[['bioguide_id', 'name', 'party']],
+               how='left', on='bioguide_id')
+
+    return df_2.to_dict(orient='records')
+
+## Get the number of votes your congressperson missed
+def get_congress_votes_missed(zip_code):
+
+    query = """
+    select bioguide_id, count(vote) as missing_votes
+    from congressional_votes_tbl
+    WHERE lower(vote) = 'not voting'
+    GROUP BY bioguide_id;"""
+
+    df = pd.read_sql_query(query, connection)
+    
+    df.loc[:, 'compared_to_avg'] = df.loc[
+        :, 'missing_votes'].apply(lambda x: x - math.floor(df.loc[:, 'missing_votes'].mean()))
+    x = df['missing_votes']
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+    
+    congress_result = get_congress_leader(zip_code)
+    congress_result = pd.DataFrame(congress_result)
+    congress_query = ''
+    df_2 = pd.DataFrame()
+    for bioguide_id in congress_result['bioguide_id']:
+        df_2 = df_2.append(df.loc[df['bioguide_id'] == '{}'.format(bioguide_id)])
+        
+    df_2 = pd.merge(df_2, congress_result[['bioguide_id', 'name', 'party']],
+                   how='left', on='bioguide_id')
+    return df_2.to_dict(orient='records')
