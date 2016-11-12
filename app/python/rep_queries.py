@@ -69,11 +69,16 @@ def get_state_by_zip(zip_code):
         return None
 
 def get_district_num(zip_code,state_short):
+    s = requests.Session()
+    s.auth = ('user', 'pass')
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+    }
     url = 'http://ziplook.house.gov/htbin/findrep?ZIP={}&Submit=FIND+YOUR+REP+BY+ZIP'.format(zip_code)
-    page = requests.get(url)
-    c = page.content
-    soup = BeautifulSoup(c, "html5lib")
-    x = str(soup.find_all('div', id="PossibleReps")).split(
+    r = requests.get(url, headers=headers)
+
+    page = BeautifulSoup(r.content, "html5lib")
+    x = str(page.find_all('div', id="PossibleReps")).split(
         'src="/zip/pictures/{}'.format(state_short.lower()))
 
     ## Since multiple district could appear I need to query to be dynamic
@@ -146,13 +151,19 @@ def get_vote_menu(db):
     return df
 
 ## Find senator from zip code
-def get_senator(state_short):
+def get_senator(zip_code):
+    state_short = get_state_by_zip(zip_code)
     senator_result = [r for r in dict_gen("""select * 
             from current_senate_bio
             where lower(state) = lower('{}');""".format(state_short))]
     return senator_result
+
 ## Find congress person from zip code
-def get_congress_leader(state_long, district):
+def get_congress_leader(zip_code):
+    state_short = get_state_by_zip(zip_code)
+    state_long = str(us.states.lookup(state_short))
+    district = get_district_num(zip_code,state_short)
+
     congress_result = [r for r in dict_gen("""select * 
             from current_congress_bio
             where state = '{}'
@@ -191,7 +202,9 @@ def get_congress_persons_votes(congress_result):
     return congress_person_votes
 
 ## Return you senators recent votes
-def get_senator_votes(state_short, senator_result):
+def get_senator_votes(zip_code):
+    state_short = get_state_by_zip(zip_code)
+    senator_result = get_senator(zip_code)
 
     senator_votes = [r for r in dict_gen("""
        select senate_subset.*,
@@ -212,3 +225,28 @@ def get_senator_votes(state_short, senator_result):
             senator_votes[i]['date'])
         
     return senator_votes
+
+
+
+
+# def get_senator_votes(state_short, senator_result):
+
+#     senator_votes = [r for r in dict_gen("""
+#        select senate_subset.*,
+#         senate_vote_menu.title,
+#         senate_vote_menu.question
+#         from (select distinct * 
+#         from senator_votes_tbl
+#         where lower(state) = lower('{}')
+#         order by roll desc 
+#         limit {})
+#         as senate_subset
+#         left join senate_vote_menu
+#         on (senate_subset.roll_id = senate_vote_menu.vote_id);""".format(
+#                 state_short, 5*len(senator_result)))]
+#     ## Change datetime format
+#     for i in range(len(senator_votes)):
+#         senator_votes[i]['date'] = pd.to_datetime(
+#             senator_votes[i]['date'])
+        
+#     return senator_votes
