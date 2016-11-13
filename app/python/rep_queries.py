@@ -252,15 +252,24 @@ def get_congress_days_missed(zip_code):
     as total_v_missing
     where votes_missed = total_votes
     GROUP BY bioguide_id) as total_days_missed;"""
-
     df = pd.read_sql_query(query, connection)
+    
+    query = """
+    SELECT DISTINCT bioguide_id
+    from current_congress_bio;"""
+    df_2 = pd.read_sql_query(query, connection)
+    
+    """If person has not missed then they wont show up.
+    Those reps need to be add."""
+    df = pd.merge(df_2, df, how='left', on='bioguide_id')
+    df.loc[df['num_days_missed'].isnull(), 'num_days_missed'] = 0
 
     df.loc[:, 'compared_to_avg'] = df.loc[
         :, 'num_days_missed'].apply(lambda x: x - math.floor(df.loc[:, 'num_days_missed'].mean()))
 
     ## Set percentil to add context
     x = df['num_days_missed']
-    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'strict') for a in x]
 
     congress_result = get_congress_leader(zip_code)
     congress_result = pd.DataFrame(congress_result)
@@ -282,13 +291,22 @@ def get_congress_votes_missed(zip_code):
     from congressional_votes_tbl
     WHERE lower(vote) = 'not voting'
     GROUP BY bioguide_id;"""
-
     df = pd.read_sql_query(query, connection)
+    
+    query = """
+    SELECT DISTINCT bioguide_id
+    from current_congress_bio;"""
+    df_2 = pd.read_sql_query(query, connection)
+    
+    """If person has not missed then they wont show up.
+    Those reps need to be add."""
+    df = pd.merge(df_2, df, how='left', on='bioguide_id')
+    df.loc[df['missing_votes'].isnull(), 'missing_votes'] = 0
     
     df.loc[:, 'compared_to_avg'] = df.loc[
         :, 'missing_votes'].apply(lambda x: x - math.floor(df.loc[:, 'missing_votes'].mean()))
     x = df['missing_votes']
-    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'strict') for a in x]
     
     congress_result = get_congress_leader(zip_code)
     congress_result = pd.DataFrame(congress_result)
@@ -332,7 +350,7 @@ def get_senate_days_missed(zip_code):
     df.loc[:, 'compared_to_avg'] = df.loc[
         :, 'num_days_missed'].apply(lambda x: x - math.floor(df.loc[:, 'num_days_missed'].mean()))
     x = df['num_days_missed']
-    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'strict') for a in x]
 
     senator_result = get_senator(zip_code)
     senator_result = pd.DataFrame(senator_result)
@@ -354,13 +372,22 @@ def get_senate_votes_missed(zip_code):
     from senator_votes_tbl
     WHERE lower(vote_cast) = 'not voting'
     GROUP BY member_full;"""
-
     df = pd.read_sql_query(query, connection)
+    
+    query = """
+    SELECT DISTINCT member_full
+    from current_senate_bio;"""
+    df_2 = pd.read_sql_query(query, connection)
+    
+    """If person has not missed then they wont show up.
+    Those reps need to be add."""
+    df = pd.merge(df_2, df, how='left', on='member_full')
+    df.loc[df['missing_votes'].isnull(), 'missing_votes'] = 0
     
     df.loc[:, 'compared_to_avg'] = df.loc[
         :, 'missing_votes'].apply(lambda x: x - math.floor(df.loc[:, 'missing_votes'].mean()))
     x = df['missing_votes']
-    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'strict') for a in x]
     
     senator_result = get_senator(zip_code)
     senator_result = pd.DataFrame(senator_result)
