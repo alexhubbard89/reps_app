@@ -344,8 +344,18 @@ def get_senate_days_missed(zip_code):
     as total_v_missing
     where votes_missed = total_votes
     GROUP BY member_full) as total_days_missed;"""
-
     df = pd.read_sql_query(query, connection)
+
+    
+    query = """
+    select DISTINCT member_full
+    from current_senate_bio;"""
+    df_2 = pd.read_sql_query(query, connection)
+    
+    """If person has not missed then they wont show up.
+    Those reps need to be add."""
+    df = pd.merge(df_2, df, how='left', on='member_full')
+    df.loc[df['num_days_missed'].isnull(), 'num_days_missed'] = 0
 
     df.loc[:, 'compared_to_avg'] = df.loc[
         :, 'num_days_missed'].apply(lambda x: x - math.floor(df.loc[:, 'num_days_missed'].mean()))
@@ -375,7 +385,7 @@ def get_senate_votes_missed(zip_code):
     df = pd.read_sql_query(query, connection)
     
     query = """
-    SELECT DISTINCT member_full
+    select DISTINCT member_full
     from current_senate_bio;"""
     df_2 = pd.read_sql_query(query, connection)
     
