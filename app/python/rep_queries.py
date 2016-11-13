@@ -300,3 +300,75 @@ def get_congress_votes_missed(zip_code):
     df_2 = pd.merge(df_2, congress_result[['bioguide_id', 'name', 'party']],
                    how='left', on='bioguide_id')
     return df_2.to_dict(orient='records')
+
+
+def get_senate_days_missed(zip_code):
+
+    query = """
+    select *
+    from
+    (select member_full, 
+    count(votes_missed) as num_days_missed
+    from
+    (select votes_missed_df.*, 
+    total_votes.total_votes
+    from (select date, member_full, count(distinct(roll_id)) as votes_missed
+    from senator_votes_tbl
+    where lower(vote_cast) = 'not voting'
+    GROUP BY date, member_full
+    ORDER BY date, member_full) as votes_missed_df
+    left join (select date, 
+    count(distinct(roll_id)) as total_votes
+    from senator_votes_tbl
+    GROUP BY date
+    ORDER BY date) as total_votes
+    on votes_missed_df.date = total_votes.date) 
+    as total_v_missing
+    where votes_missed = total_votes
+    GROUP BY member_full) as total_days_missed;"""
+
+    df = pd.read_sql_query(query, connection)
+
+    df.loc[:, 'compared_to_avg'] = df.loc[
+        :, 'num_days_missed'].apply(lambda x: x - math.floor(df.loc[:, 'num_days_missed'].mean()))
+    x = df['num_days_missed']
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+
+    senator_result = get_senator(zip_code)
+    senator_result = pd.DataFrame(senator_result)
+    df_2 = pd.DataFrame()
+    for member_full in senator_result['member_full']:
+        df_2 = df_2.append(df.loc[df['member_full'] == '{}'.format(member_full)])
+        
+    df_2 = pd.merge(df_2, senator_result[['member_full', 'first_name',
+                                          'last_name', 'party']],
+                   how='left', on='member_full')
+    return df_2.to_dict(orient='records')
+
+
+## Get the number of votes your congressperson missed
+def get_senate_votes_missed(zip_code):
+
+    query = """
+    select member_full, count(vote_cast) as missing_votes
+    from senator_votes_tbl
+    WHERE lower(vote_cast) = 'not voting'
+    GROUP BY member_full;"""
+
+    df = pd.read_sql_query(query, connection)
+    
+    df.loc[:, 'compared_to_avg'] = df.loc[
+        :, 'missing_votes'].apply(lambda x: x - math.floor(df.loc[:, 'missing_votes'].mean()))
+    x = df['missing_votes']
+    df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'rank') for a in x]
+    
+    senator_result = get_senator(zip_code)
+    senator_result = pd.DataFrame(senator_result)
+    df_2 = pd.DataFrame()
+    for member_full in senator_result['member_full']:
+        df_2 = df_2.append(df.loc[df['member_full'] == '{}'.format(member_full)])
+        
+    df_2 = pd.merge(df_2, senator_result[['member_full', 'first_name',
+                                          'last_name', 'party']],
+                   how='left', on='member_full')
+    return df_2.to_dict(orient='records')

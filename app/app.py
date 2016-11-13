@@ -116,6 +116,28 @@ def show_congressperson_votes_missed():
         return jsonify(results=None)
 
 
+"""Make api to find the number of days your congressperson missed"""
+@app.route('/api/find_senator_days_missed', methods=['POST'])
+def show_senate_days_missed():
+    data = json.loads(request.data.decode())
+    zip_code = int(data["zipcode"])
+    if len(str(zip_code)) == 5:
+        senate_days_missed_report = reps_query.get_senate_days_missed(zip_code)
+        return jsonify(results=senate_days_missed_report)
+    else:
+        return jsonify(results=None)
+
+"""Make api to find the number of votes your congressperson missed"""
+@app.route('/api/find_senator_votes_missed', methods=['POST'])
+def show_senator_votes_missed():
+    data = json.loads(request.data.decode())
+    zip_code = int(data["zipcode"])
+    if len(str(zip_code)) == 5:
+        senator_votes_missed_report = reps_query.get_senate_votes_missed(zip_code)
+        return jsonify(results=senator_votes_missed_report)
+    else:
+        return jsonify(results=None)
+
 
 
 @app.route('/', methods=['GET', 'POST'])
