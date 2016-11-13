@@ -90,6 +90,8 @@ def get_district_num(zip_code,state_short):
         if first_query > 0:
             total_query += " or district = '{}'".format(int(str(x[district_num].split('_')[0])))
         first_query += 1
+    if total_query == "district = '0'":
+        total_query = total_query.replace('0', 'at large')
     return total_query
 
 ## Get query to get vote menu up to day of year
