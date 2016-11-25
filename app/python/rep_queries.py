@@ -44,7 +44,6 @@ def dict_gen(sql_query):
         for row in rows:
             yield dict(itertools.izip(field_names, row))
 
-    connection.close()
 
 
 def get_state_by_zip(zip_code):
@@ -67,6 +66,37 @@ def get_state_by_zip(zip_code):
     except IndexError:
         "No data"
         return None
+
+
+#def get_district_from_address(street, city, zip_code):
+def get_district_from_address(street, city, state_short, state_long):
+    import requests
+    import us
+    
+    state = '{}{}'.format(state_short, state_long)
+    
+    s = requests.Session()
+    s.auth = ('user', 'pass')
+    headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
+    }
+    url = 'http://ziplook.house.gov/htbin/findrep?ADDRLK'
+    form_data = {
+        'street': street,
+        'city': city,
+        'state': state,
+        'submit': 'FIND YOUR REP',
+    }
+
+    response = requests.request(method='POST', url=url, data=form_data, headers=headers)
+    x = str(response.content.split('src="/zip/pictures/{}'.format(state_short.lower()))[1].split('_')[0])
+
+    ## Make district query
+    total_query = "district = '{}'".format(int(x))
+    if total_query == "district = '0'":
+        total_query = total_query.replace('0', 'at large')
+    return total_query
+    
 
 def get_district_num(zip_code,state_short):
     s = requests.Session()
@@ -161,10 +191,10 @@ def get_senator(zip_code):
     return senator_result
 
 ## Find congress person from zip code
-def get_congress_leader(zip_code):
+def get_congress_leader(street, city, zip_code):
     state_short = get_state_by_zip(zip_code)
     state_long = str(us.states.lookup(state_short))
-    district = get_district_num(zip_code,state_short)
+    district = get_district_from_address(street, city, state_short, state_long)
 
     congress_result = [r for r in dict_gen("""select * 
             from current_congress_bio
@@ -173,8 +203,8 @@ def get_congress_leader(zip_code):
     return congress_result
 
 ## Return you congress persons recent votes
-def get_congress_persons_votes(zip_code):
-    congress_result = get_congress_leader(zip_code)
+def get_congress_persons_votes(street, city, zip_code):
+    congress_result = get_congress_leader(street, city, zip_code)
     total_query = ''
     for i in range(len(congress_result)):
         if i == 0:
@@ -230,7 +260,7 @@ def get_senator_votes(zip_code):
 
 
 ## Get the number of days your congressperson missed
-def get_congress_days_missed(zip_code):
+def get_congress_days_missed(street, city, zip_code):
 
     query = """
     select *
@@ -273,7 +303,7 @@ def get_congress_days_missed(zip_code):
     x = df['num_days_missed']
     df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'strict') for a in x]
 
-    congress_result = get_congress_leader(zip_code)
+    congress_result = get_congress_leader(street, city, zip_code)
     congress_result = pd.DataFrame(congress_result)
     congress_query = ''
     df_2 = pd.DataFrame()
@@ -286,7 +316,7 @@ def get_congress_days_missed(zip_code):
     return df_2.to_dict(orient='records')
 
 ## Get the number of votes your congressperson missed
-def get_congress_votes_missed(zip_code):
+def get_congress_votes_missed(street, city, zip_code):
 
     query = """
     select bioguide_id, count(vote) as missing_votes
@@ -310,7 +340,7 @@ def get_congress_votes_missed(zip_code):
     x = df['missing_votes']
     df.loc[:, 'percentile'] = [100 - stats.percentileofscore(x, a, 'strict') for a in x]
     
-    congress_result = get_congress_leader(zip_code)
+    congress_result = get_congress_leader(street, city, zip_code)
     congress_result = pd.DataFrame(congress_result)
     congress_query = ''
     df_2 = pd.DataFrame()
