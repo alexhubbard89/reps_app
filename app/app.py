@@ -32,7 +32,8 @@ connection = psycopg2.connect(
     host=creds['host'],
     port=creds['port']
 )
-cursor = connection.cursor()
+"""This seems like an unnecessary connection"""
+#cursor = connection.cursor()
 
 
 """Make api to find a senator from a zip code"""
@@ -66,11 +67,15 @@ def show_senate_votes():
 """Make api to find a congressperson from a zip code"""
 @app.route('/api/find_congressperson', methods=['POST'])
 def show_congressperson():
+    print 'test'
     data = json.loads(request.data.decode())
     zip_code = str(data["zipcode"])
+    street = str(data["street"])
+    city = str(data["city"])
+    print 'hi'
     if len(str(zip_code)) == 5:
         try:
-            congress_result = reps_query.get_congress_leader(zip_code)
+            congress_result = reps_query.get_congress_leader(street, city, zip_code)
             return jsonify(results=congress_result)
         except:
             return jsonify(results=None)
@@ -83,9 +88,11 @@ def show_congressperson():
 def show_congressperson_votes():
     data = json.loads(request.data.decode())
     zip_code = str(data["zipcode"])
+    street = str(data["street"])
+    city = str(data["city"])
     if len(str(zip_code)) == 5:
         try:
-            congress_person_votes = reps_query.get_congress_persons_votes(zip_code)
+            congress_person_votes = reps_query.get_congress_persons_votes(street, city, zip_code)
             return jsonify(results=congress_person_votes)
         except:
             return jsonify(results=None)
@@ -98,8 +105,10 @@ def show_congressperson_votes():
 def show_congressperson_days_missed():
     data = json.loads(request.data.decode())
     zip_code = str(data["zipcode"])
+    street = str(data["street"])
+    city = str(data["city"])
     if len(str(zip_code)) == 5:
-        congress_person_days_missed_report = reps_query.get_congress_days_missed(zip_code)
+        congress_person_days_missed_report = reps_query.get_congress_days_missed(street, city, zip_code)
         return jsonify(results=congress_person_days_missed_report)
     else:
         return jsonify(results=None)
@@ -109,8 +118,10 @@ def show_congressperson_days_missed():
 def show_congressperson_votes_missed():
     data = json.loads(request.data.decode())
     zip_code = str(data["zipcode"])
+    street = str(data["street"])
+    city = str(data["city"])
     if len(str(zip_code)) == 5:
-        congress_person_votes_missed_report = reps_query.get_congress_votes_missed(zip_code)
+        congress_person_votes_missed_report = reps_query.get_congress_votes_missed(street, city, zip_code)
         return jsonify(results=congress_person_votes_missed_report)
     else:
         return jsonify(results=None)
