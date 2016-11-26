@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<link rel="stylesheet" href="">
+</head>
+<body>
+	<form action="/new_user" method="post">
+			<label for="username">User Name</label>
+            <input type=text name=username>
+            <label for="password">Password</label>
+            <input type=password name=password>
+            <label for="street">Street</label>
+            <input type=text name=street>
+            <label for="city">City</label>
+            <input type=text name=city>
+            <label for="state">State</label>
+            <input type=text name=state>
+            <label for="xip_code">Zip Code</label>
+            <input type=text name=zip_code>
+            <input type=submit value=Submit>
+        </form>
+    {{ error }}
+</body>
+</html>

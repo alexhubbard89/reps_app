@@ -17,6 +17,9 @@ import urlparse
 import us
 import math
 from scipy import stats
+from psycopg2 import IntegrityError
+from pyzipcode import ZipCodeDatabase
+zcdb = ZipCodeDatabase()
 
 
 urlparse.uses_netloc.append("postgres")
@@ -441,3 +444,108 @@ def get_senate_votes_missed(zip_code):
                                           'last_name', 'party']],
                    how='left', on='member_full')
     return df_2.to_dict(orient='records')
+
+
+"""I'm trying to depricate the google api
+so I've build these functions to get away from it"""
+def get_senator_user_builder(state_short):
+    sql_command = """
+    select * 
+    from current_senate_bio
+    where lower(state) = lower('{}');""".format(state_short)
+    
+    senator_result = pd.read_sql_query(sql_command, connection)
+    return senator_result.to_dict(orient='records')
+
+def get_congress_leader_user_builder(street, city, state_short, state_long):
+    district = get_district_from_address(street, city, state_short, state_long)
+
+    sql_command = """
+    select * 
+    from current_congress_bio
+    where state = '{}'
+    and ({});""".format(state_long, district)
+    congress_result = pd.read_sql_query(sql_command, connection)
+    return congress_result.to_dict(orient='records')
+
+
+"""Functions to create user info and put into sql"""
+
+def create_user_params(user_name, password, address, zip_code):   
+    
+    df = pd.DataFrame(columns=[['user_name', 'password', 'street', 
+        'zip_code', 'city', 'state_short', 'state_long', 
+        'senator_1_member_full', 'senator_1_bioguide_id', 
+        'senator_2_member_full', 'senator_2_bioguide_id', 
+        'congressperson_bioguide_id']])
+    
+    df.loc[0, 'user_name'] = user_name
+    df.loc[0, 'password'] = password
+    df.loc[0, 'street'] = address
+    df.loc[0, 'zip_code'] = int(zip_code)
+    zipcode = zcdb[int(df.loc[0, 'zip_code'])]
+    df.loc[0, 'city'] = zipcode.city
+    df.loc[0, 'state_short'] = zipcode.state
+    df.loc[0, 'state_long'] = str(us.states.lookup(df.loc[0, 'state_short']))
+    
+    ## Get reps 
+    senator_result = get_senator_user_builder(df.loc[0, 'state_short'])
+    congress_result = get_congress_leader_user_builder(df.loc[0, 'street'], df.loc[0, 'city'],
+                                                       df.loc[0, 'state_short'], df.loc[0, 'state_long'])
+    
+    ## Add reps ids to user info
+    df.loc[0, 'senator_1_member_full'] = senator_result[0]['member_full']
+    df.loc[0, 'senator_1_bioguide_id'] = senator_result[0]['bioguide_id']
+    df.loc[0, 'senator_2_member_full'] = senator_result[1]['member_full']
+    df.loc[0, 'senator_2_bioguide_id'] = senator_result[1]['bioguide_id']
+    df.loc[0, 'congressperson_bioguide_id'] = congress_result[0]['bioguide_id']
+    
+    return df
+
+def user_info_to_sql(df):
+    x = list(df.loc[0,])
+    cursor = connection.cursor()
+
+    for p in [x]:
+        format_str = """
+        INSERT INTO user_tbl (
+        user_name,
+        password,
+        street,
+        zip_code,
+        city,
+        state_short,
+        state_long,
+        senator_1_member_full,
+        senator_1_bioguide_id,
+        senator_2_member_full,
+        senator_2_bioguide_id,
+        congressperson_bioguide_id)
+        VALUES ('{user_name}', '{password}', '{street}', '{zip_code}', '{city}', '{state_short}',
+                '{state_long}', '{senator_1_member_full}', '{senator_1_bioguide_id}', 
+                '{senator_2_member_full}', '{senator_2_bioguide_id}', 
+                '{congressperson_bioguide_id}');"""
+
+
+    sql_command = format_str.format(user_name=df.loc[0, 'user_name'], 
+        password=df.loc[0, 'password'], street=df.loc[0, 'street'], 
+        zip_code=int(df.loc[0, 'zip_code']), city=df.loc[0, 'city'], 
+        state_short=df.loc[0, 'state_short'], 
+        state_long=df.loc[0, 'state_long'],  
+        senator_1_member_full=df.loc[0, 'senator_1_member_full'], 
+        senator_1_bioguide_id=df.loc[0, 'senator_1_bioguide_id'], 
+        senator_2_member_full=df.loc[0, 'senator_2_member_full'], 
+        senator_2_bioguide_id=df.loc[0, 'senator_2_bioguide_id'], 
+        congressperson_bioguide_id=df.loc[0, 'congressperson_bioguide_id'])
+
+
+    try:
+        cursor.execute(sql_command)
+        connection.commit()
+        user_made = True
+    except IntegrityError as e:
+        """duplicate key value violates unique constraint "user_tbl_user_name_key"
+        DETAIL:  Key (user_name)=(user_test) already exists."""
+        connection.rollback()
+        user_made = False
+    return user_made
