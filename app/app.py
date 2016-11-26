@@ -1,5 +1,5 @@
 from __future__ import division
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
 import sqlite3
 import pandas as pd
 import numpy as np
@@ -16,6 +16,7 @@ import psycopg2
 import urlparse
 import us
 import imp
+from psycopg2 import IntegrityError
 reps_query = imp.load_source('module', 'app/python/rep_queries.py')
 
 
@@ -54,7 +55,7 @@ def show_senator():
 @app.route('/api/find_senator_votes', methods=['POST'])
 def show_senate_votes():
     data = json.loads(request.data.decode())
-    zip_code = str(data["zipcode"])
+    zip_code = str(data["zipcode"]) 
     if len(str(zip_code)) == 5:
         try:
             senator_voting_result = reps_query.get_senator_votes(zip_code)
@@ -154,6 +155,46 @@ def show_senator_votes_missed():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('index.html')
+
+## Login testing
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']        
+        # if password == username + "_secret":
+        #     id = username.split('user')[1]
+        #     user = User(id)
+        #     login_user(user)
+        if password != None:
+            return render_template('login_yes.html')
+        else:
+            #return abort(401)
+            return render_template('login.html')
+    else:
+        return render_template('login.html')
+
+
+@app.route("/new_user", methods=["GET", "POST"])
+def create_user():
+    error = "Please fill out parameters"
+    if request.method == 'POST':
+        user_name = request.form['username']
+        password = request.form['password']
+        address = request.form['street']
+        zip_code = request.form['zip_code']
+
+        df = reps_query.create_user_params(user_name, password, address, zip_code)
+        user_made = reps_query.user_info_to_sql(df)
+
+        if user_made == True:
+            return render_template('login_yes.html')
+        elif user_made == False:
+            #return abort(401)
+            error = "oops! That user name already exists."
+            return render_template('new_user.html', error=error)
+    else:
+        return render_template('new_user.html', error=error)
 
 
 if __name__ == '__main__':

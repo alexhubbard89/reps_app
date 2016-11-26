@@ -6,6 +6,7 @@ import psycopg2
 import urlparse
 import pandas as pd
 
+
 #connection = sqlite3.connect("../rep_app.db")
 #cursor = connection.cursor()
 urlparse.uses_netloc.append("postgres")
@@ -129,6 +130,26 @@ CREATE TABLE senator_votes_tbl (
     year int);"""
 
 cursor.execute(sql_command)
+
+## Create user_tbl table
+sql_command = """
+    CREATE TABLE user_tbl (
+    user_id serial primary key,
+    user_name varchar(255) unique,
+    password varchar(255),
+    street varchar(255),
+    zip_code int,
+    city varchar(255),
+    state_short varchar(255),
+    state_long varchar(255),
+    senator_1_member_full varchar(255),
+    senator_1_bioguide_id varchar(255),
+    senator_2_member_full varchar(255),
+    senator_2_bioguide_id varchar(255),
+    congressperson_bioguide_id varchar(255));"""
+cursor.execute(sql_command)
+
+
 # never forget this, if you want the changes to be saved:
 connection.commit()
 connection.close()
