@@ -15,8 +15,8 @@ import os
 import psycopg2
 import urlparse
 import us
-import imp
 from psycopg2 import IntegrityError
+import imp
 reps_query = imp.load_source('module', 'app/python/rep_queries.py')
 
 
@@ -160,17 +160,21 @@ def index():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']        
+        user_name = request.form['username']
+        password = request.form['password']
+        matched_credentials = reps_query.search_user(user_name, password)    
         # if password == username + "_secret":
         #     id = username.split('user')[1]
         #     user = User(id)
         #     login_user(user)
-        if password != None:
+        if matched_credentials == True:
+            user_data = reps_query.get_user_data(user_name)
+            print user_data
             return render_template('login_yes.html')
         else:
             #return abort(401)
-            return render_template('login.html')
+            error = "Wrong user name or password"
+            return render_template('login.html', error=error)
     else:
         return render_template('login.html')
 
