@@ -23,7 +23,7 @@ zcdb = ZipCodeDatabase()
 
 
 urlparse.uses_netloc.append("postgres")
-creds = pd.read_json('app/db_creds.json').loc[0,'creds']
+creds = pd.read_json('/Users/Alexanderhubbard/Documents/projects/reps_app/app/db_creds.json').loc[0,'creds']
 
 connection = psycopg2.connect(
     database=creds['database'],
@@ -468,6 +468,32 @@ def get_congress_leader_user_builder(street, city, state_short, state_long):
     congress_result = pd.read_sql_query(sql_command, connection)
     return congress_result.to_dict(orient='records')
 
+"""Hash password"""
+# def password_hasing(password):
+#     ## for password hashing
+#     import hashlib, uuid
+#     salt = uuid.uuid4().hex
+#     hashed_password = hashlib.sha512(password + salt).hexdigest()
+#     return hashed_password
+
+def hash_password(password, version=1, salt=None):
+    import hashlib, uuid
+    if version == 1:
+        if salt == None:
+            salt = uuid.uuid4().hex[:16]
+        hashed = salt + hashlib.sha1( salt + password).hexdigest()
+        # generated hash is 56 chars long
+        return hashed
+    # incorrect version ?
+    return None
+
+def test_password(password, hashed, version=1):
+    import hashlib, uuid
+    if version == 1:
+        salt = hashed[:16]
+        rehashed = hash_password(password, version, salt)
+        return rehashed == hashed
+    return False
 
 """Functions to create user info and put into sql"""
 
@@ -480,7 +506,7 @@ def create_user_params(user_name, password, address, zip_code):
         'congressperson_bioguide_id']])
     
     df.loc[0, 'user_name'] = user_name
-    df.loc[0, 'password'] = password
+    df.loc[0, 'password'] = hash_password(password)
     df.loc[0, 'street'] = address
     df.loc[0, 'zip_code'] = int(zip_code)
     zipcode = zcdb[int(df.loc[0, 'zip_code'])]
@@ -549,3 +575,31 @@ def user_info_to_sql(df):
         connection.rollback()
         user_made = False
     return user_made
+
+"""Check if passwords match for login process"""
+def search_user_name(user_name):
+    sql_command = """
+    select password from  user_tbl
+    where user_name = '{}'""".format(user_name)
+
+    user_results = pd.read_sql_query(sql_command, connection)
+    return user_results
+
+def search_user(user_name, password):
+    try:
+        password_found = search_user_name(user_name).loc[0, 'password']
+        pw_match = test_password(password, password_found, version=1)
+        if pw_match == True:
+            return True
+        elif pw_match == False:
+            return False
+    except KeyError:
+        return "user does not exist"
+
+def get_user_data(user_name):
+    sql_command = """
+    select * from  user_tbl
+    where user_name = '{}'""".format(user_name)
+
+    user_results = pd.read_sql_query(sql_command, connection)
+    return user_results
