@@ -157,48 +157,62 @@ def index():
     return render_template('index.html')
 
 ## Login testing
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["POST"])
 def login():
-    if request.method == 'POST':
-        user_name = request.form['username']
-        password = request.form['password']
-        matched_credentials = reps_query.search_user(user_name, password)    
-        # if password == username + "_secret":
-        #     id = username.split('user')[1]
-        #     user = User(id)
-        #     login_user(user)
-        if matched_credentials == True:
-            user_data = reps_query.get_user_data(user_name)
-            print user_data
-            return render_template('login_yes.html')
-        else:
-            #return abort(401)
-            error = "Wrong user name or password"
-            return render_template('login.html', error=error)
+    """Where its commented out is for html form"""
+    # if request.method == 'POST':
+    data = json.loads(request.data.decode())
+    username = data['username']
+    password = data['password']
+
+    # username = request.form['username']
+    # password = request.form['password']
+    matched_credentials = reps_query.search_user(username, password)    
+    if matched_credentials == True:
+        user_data = reps_query.get_user_data(username)
+        print user_data
+        #return render_template('login_yes.html')
+        return jsonify(reselts=user_data.to_dict(orient='records'))
     else:
-        return render_template('login.html')
+        #return abort(401)
+        error = "Wrong user name or password"
+        # return render_template('login.html', error=error)
+        print error
+        return jsonify(reselts=None)
+    # else:
+    #     return render_template('login.html')
 
 
-@app.route("/new_user", methods=["GET", "POST"])
+@app.route("/new_user", methods=["POST"])
 def create_user():
-    error = "Please fill out parameters"
-    if request.method == 'POST':
-        user_name = request.form['username']
-        password = request.form['password']
-        address = request.form['street']
-        zip_code = request.form['zip_code']
+    """Where its commented out is for html form"""
+    # error = "Please fill out parameters"
+    # if request.method == 'POST':
+    data = json.loads(request.data.decode())
+    username = data['username']
+    password = data['password']
+    address = data['street']
+    zip_code = data['zip_code']
 
-        df = reps_query.create_user_params(user_name, password, address, zip_code)
-        user_made = reps_query.user_info_to_sql(df)
+    # username = request.form['username']
+    # password = request.form['password']
+    # address = request.form['street']
+    # zip_code = request.form['zip_code']
+    print "hilo"
 
-        if user_made == True:
-            return render_template('login_yes.html')
-        elif user_made == False:
-            #return abort(401)
-            error = "oops! That user name already exists."
-            return render_template('new_user.html', error=error)
-    else:
-        return render_template('new_user.html', error=error)
+    df = reps_query.create_user_params(username, password, address, zip_code)
+    user_made = reps_query.user_info_to_sql(df)
+
+    if user_made == True:
+        #return render_template('login_yes.html')
+        return jsonify(result=True)
+    elif user_made == False:
+        #return abort(401)
+        error = "oops! That user name already exists."
+        #return render_template('new_user.html', error=error)
+        return jsonify(result=False)
+    # else:
+    #     return render_template('new_user.html', error=error)
 
 
 if __name__ == '__main__':
