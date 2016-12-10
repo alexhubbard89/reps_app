@@ -154,7 +154,7 @@ def show_senator_votes_missed():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    return render_template('welcome.html')
 
 ## Login testing
 @app.route("/login", methods=["POST"])
@@ -229,6 +229,6 @@ if __name__ == '__main__':
 
     tornado.options.parse_command_line()
     http_server = HTTPServer(WSGIContainer(app))
-    http_server.listen(8000, address='127.0.0.1')
+    http_server.listen(5000, address='127.0.0.1')
     tornado.web.Application(debug=True)
     IOLoop.instance().start()

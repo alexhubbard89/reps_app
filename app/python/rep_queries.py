@@ -23,7 +23,8 @@ zcdb = ZipCodeDatabase()
 
 
 urlparse.uses_netloc.append("postgres")
-creds = pd.read_json('/Users/Alexanderhubbard/Documents/projects/reps_app/app/db_creds.json').loc[0,'creds']
+# creds = pd.read_json('/Users/Alexanderhubbard/Documents/projects/reps_app/app/db_creds.json').loc[0,'creds']
+creds = pd.read_json('app/db_creds.json').loc[0,'creds']
 
 connection = psycopg2.connect(
     database=creds['database'],
